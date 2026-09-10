@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Unattend Studio</title>
+  <link rel="stylesheet" href="ui/styles.css">
+</head>
+<body>
+  <header class="app-bar">
+    <a class="wordmark" href="#" aria-label="Unattend Studio home"><span class="wordmark-icon" aria-hidden="true">U</span><span>Unattend Studio</span></a>
+    <div class="app-bar-actions"><span class="local-label">Local workspace</span><a href="https://github.com/cschneegans/unattend-generator" target="_blank" rel="noreferrer">Source</a></div>
+  </header>
+  <div class="app-shell">
+    <aside class="setup-rail" aria-label="Setup steps">
+      <p class="rail-title">New answer file</p>
+      <ol id="steps">
+        <li class="current"><button type="button" data-go="0"><span>1</span>Setup style</button></li>
+        <li><button type="button" data-go="1"><span>2</span>Basics</button></li>
+        <li><button type="button" data-go="2"><span>3</span>Accounts</button></li>
+        <li><button type="button" data-go="3"><span>4</span>Remove apps</button></li>
+        <li><button type="button" data-go="4"><span>5</span>Advanced</button></li>
+        <li><button type="button" data-go="5"><span>6</span>Output</button></li>
+      </ol>
+      <p class="rail-help">Your settings and downloaded file remain on this computer.</p>
+    </aside>
+    <main class="work-area">
+      <section class="wizard-page active" data-page="0">
+        <div class="page-heading"><p>Step 1 of 6</p><h1>Choose a starting point</h1><span>This sets sensible defaults. Every choice can still be changed.</span></div>
+        <div class="profile-list" role="radiogroup" aria-label="Setup style">
+          <div class="profile-option" data-profile-card="minimal"><input id="profile-minimal" type="radio" name="profile" value="minimal"><label for="profile-minimal"><strong>Lean Windows</strong><small>Removes nearly everything Windows does not need to run. Best for experienced users who want the smallest install.</small></label><label class="preconfigured"><input type="checkbox" data-preconfigured="minimal"><span>Preconfigured</span></label></div>
+          <div class="profile-option selected" data-profile-card="standard"><input id="profile-standard" type="radio" name="profile" value="standard" checked><label for="profile-standard"><strong>Clean Windows</strong><small>Removes advertising apps and common bloat while keeping core Windows tools and gaming support.</small></label><label class="preconfigured"><input type="checkbox" data-preconfigured="standard"><span>Preconfigured</span></label></div>
+          <div class="profile-option" data-profile-card="custom"><input id="profile-custom" type="radio" name="profile" value="custom"><label for="profile-custom"><strong>Custom setup</strong><small>Starts with no removals. Pick every app and setting yourself.</small></label><span class="profile-mode">Manual</span></div>
+          <div class="profile-option disabled" data-profile-card="preset"><input id="profile-preset" type="radio" name="profile" value="preset" disabled><label for="profile-preset"><strong>Presets</strong><small id="preset-description">Save a setup first, then reuse it here.</small></label><span class="profile-mode">Saved locally</span></div>
+        </div>
+        <div class="wizard-actions"><span></span><button class="button primary next" type="button">Continue</button></div>
+      </section>
+      <section class="wizard-page" data-page="1">
+        <div class="page-heading"><p>Step 2 of 6</p><h1>Windows basics</h1><span>Choose the language and identify this computer.</span></div>
+        <div class="form-section"><div class="field-grid">
+          <label>Display language<select id="language"><option value="en-US">English (United States)</option><option value="en-GB">English (United Kingdom)</option><option value="de-DE">Deutsch (Deutschland)</option><option value="fr-FR">Français (France)</option><option value="el-GR">Ελληνικά (Ελλάδα)</option></select></label>
+          <label>Keyboard layout<select id="keyboard"><option value="en-US">US</option><option value="en-GB">United Kingdom</option><option value="de-DE">German</option><option value="fr-FR">French</option><option value="el-GR">Greek</option></select></label>
+          <label>Computer name<input id="computer" type="text" maxlength="15" placeholder="DESKTOP-PC" autocomplete="off"><small>Maximum 15 characters. Letters, numbers and hyphens work best.</small></label>
+          <label>Processor architecture<select id="architecture"><option value="amd64">64-bit PC (recommended)</option><option value="arm64">ARM64</option><option value="x86">32-bit PC</option></select></label>
+        </div></div>
+        <div class="wizard-actions"><button class="button back" type="button">Back</button><button class="button primary next" type="button">Next: accounts</button></div>
+      </section>
+      <section class="wizard-page" data-page="2">
+        <div class="page-heading"><p>Step 3 of 6</p><h1>Local accounts</h1><span>Add up to five accounts. At least one administrator is recommended.</span></div>
+        <div id="accounts" class="accounts-list"></div>
+        <p id="account-error" class="form-error" role="alert" hidden></p>
+        <button id="add-account" class="add-account" type="button"><span aria-hidden="true"></span>Add another account</button>
+        <div class="form-section compact">
+          <label class="switch-row"><input id="eula" type="checkbox" checked><span><strong>Accept the license agreement</strong><small>Required for an unattended Windows Setup.</small></span></label>
+          <label class="switch-row"><input id="network" type="checkbox" checked><span><strong>Go straight to the desktop</strong><small>Skips the network and remaining Windows setup screens, then signs in once.</small></span></label>
+        </div>
+        <div class="wizard-actions"><button class="button back" type="button">Back</button><button class="button primary next" type="button">Next: remove apps</button></div>
+      </section>
+      <section class="wizard-page" data-page="3">
+        <div class="page-heading"><p>Step 4 of 6</p><h1>Remove preinstalled apps</h1><span>Removal runs locally after the first administrator signs in.</span></div>
+        <div class="preset-bar" role="group" aria-label="Removal presets"><button type="button" class="text-button" data-preset="recommended">Clean Windows</button><button type="button" class="text-button" data-preset="xbox">Xbox only</button><button type="button" class="text-button" data-preset="minimal">Lean Windows</button><button type="button" class="text-button quiet" data-preset="none">Clear</button></div>
+        <label class="search-field"><span class="sr-only">Search apps</span><input id="app-search" type="search" placeholder="Search apps, for example Xbox or Copilot"></label>
+        <div class="selection-note"><strong id="app-count">0 apps selected</strong><span>Some Windows tools are harder to restore after removal.</span></div>
+        <div id="bloatware-list" class="app-list" aria-live="polite"><div class="list-skeleton" aria-label="Loading app catalog"><i></i><i></i><i></i><i></i></div></div>
+        <div class="wizard-actions"><button class="button back" type="button">Back</button><button class="button primary next" type="button">Next: advanced</button></div>
+      </section>
+      <section class="wizard-page" data-page="4">
+        <div class="page-heading"><p>Step 5 of 6</p><h1>Advanced options</h1><span>Extra Windows Setup controls. Defaults are conservative.</span></div>
+        <p class="advisory"><strong>Advanced settings can change security and recovery behavior.</strong> Review each enabled option before using the answer file.</p>
+        <div id="advanced-options" class="option-groups"></div>
+        <div class="wizard-actions"><button class="button back" type="button">Back</button><button class="button primary next" type="button">Next: output</button></div>
+      </section>
+      <section class="wizard-page" data-page="5">
+        <div class="page-heading"><p>Step 6 of 6</p><h1>Your file is ready</h1><span>Review the setup, save it for later, or download the Windows answer file.</span></div>
+        <dl id="review" class="review-list"></dl>
+        <details class="xml-panel"><summary>Inspect generated XML</summary><pre id="preview"></pre></details>
+        <p class="advisory"><strong>Before installing:</strong> keep a backup and disconnect drives you do not want Windows Setup to touch.</p>
+        <div class="wizard-actions"><button class="button back" type="button">Back</button><div><button class="button" id="save-preset" type="button">Save as preset</button><button class="button" id="copy" type="button">Copy XML</button><button class="button primary" id="finish" type="button">Download file</button></div></div>
+      </section>
+    </main>
+  </div>
+  <script src="ui/app.js"></script>
+</body>
+</html>
