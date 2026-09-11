@@ -129,6 +129,17 @@ def main() -> None:
         for token in ("BypassNRO", "AutoLogon", "AllowTelemetry", "Containers-DisposableClientVM", "UnattendStudio-System.ps1"):
             assert token in xml, token
 
+        driver.execute_script("document.querySelectorAll('[data-advanced]').forEach(e=>e.checked=false)")
+        for name in ("Always show file extensions", "Show hidden files"):
+            driver.execute_script("const n=arguments[0],e=[...document.querySelectorAll('[data-advanced]')].find(x=>x.dataset.advanced===n);e.click()", name)
+        explorer_xml = driver.execute_script("return generatedXml()")
+        assert "Set-UnattendExplorerPreferences" in explorer_xml
+        assert "New-ItemProperty" in explorer_xml
+        assert "HideFileExt" in explorer_xml and "Hidden" in explorer_xml
+        assert "Registry::HKEY_USERS\\DefaultUser" in explorer_xml
+        assert "Registry::HKEY_CURRENT_USER" in explorer_xml
+        assert "$attempt -lt 5" in explorer_xml
+
         driver.execute_script("document.querySelectorAll('[data-advanced]').forEach(e=>e.checked=false);document.getElementById('network').checked=false")
         baseline = driver.execute_script("return generatedXml()")
         unchanged = []
@@ -192,6 +203,11 @@ def main() -> None:
         assert driver.execute_script("return state.profile") == "preset"
         assert driver.execute_script("return state.setupName") == "Office image"
 
+        driver.execute_script("window.__revoked=[];window.__originalRevoke=URL.revokeObjectURL;URL.revokeObjectURL=(url)=>window.__revoked.push(url);downloadXml()")
+        assert driver.execute_script("return window.__revoked.length") == 0
+        time.sleep(1.1)
+        assert driver.execute_script("URL.revokeObjectURL=window.__originalRevoke;return window.__revoked.length") == 1
+
         driver.execute_script("showPage(0)")
         driver.find_element(By.ID, "profile-preset").click()
         time.sleep(0.25)
@@ -201,6 +217,13 @@ def main() -> None:
         assert driver.execute_script("return localStorage.getItem('unattend-studio-preset-v1')") is None
         assert driver.find_element(By.CSS_SELECTOR, ".preset-empty").is_displayed()
         assert driver.find_element(By.ID, "profile-custom").is_selected()
+
+        driver.execute_script("localStorage.setItem('unattend-studio-preset-v1', JSON.stringify({version:1,accounts:{name:'broken'},apps:{},advanced:'all'}))")
+        driver.refresh()
+        time.sleep(0.25)
+        assert "has-preset" not in driver.find_element(By.ID, "profile-preset").get_attribute("class").split()
+        driver.find_element(By.ID, "profile-preset").click()
+        assert "No presets saved yet" in driver.find_element(By.ID, "preset-content").text
 
         driver.execute_script("localStorage.setItem('unattend-studio-preset-v1','not-json')")
         driver.refresh()

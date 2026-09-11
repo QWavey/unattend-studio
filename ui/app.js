@@ -182,7 +182,12 @@ function selectProfile(profile) {
 }
 
 function savedPreset() {
-  try { const value=localStorage.getItem("unattend-studio-preset-v1"); return value?JSON.parse(value):null; } catch { return null; }
+  try {
+    const value=localStorage.getItem("unattend-studio-preset-v1"), preset=value?JSON.parse(value):null;
+    if(!preset||typeof preset!=="object"||Array.isArray(preset)||preset.version!==1) return null;
+    if(!Array.isArray(preset.accounts)||!Array.isArray(preset.apps)||!Array.isArray(preset.advanced)) return null;
+    return preset;
+  } catch { return null; }
 }
 function updatePresetChoice() {
   const exists=Boolean(savedPreset());
@@ -327,12 +332,20 @@ function removalScript() {
 function selectedAdvanced() { return new Set([...document.querySelectorAll("[data-advanced]:checked")].map((input) => input.dataset.advanced)); }
 function hasAdvanced(name) { return selectedAdvanced().has(name); }
 function reg(root,path,name,type,value) { return `reg.exe add '${root}\\${path}' /v '${name}' /t ${type} /d ${quotePowerShell(value)} /f`; }
+function explorerPreferencesScript(root,retry=false) {
+  const selected=selectedAdvanced();
+  const values=[];
+  if(selected.has("Always show file extensions")) values.push("'HideFileExt'=0");
+  if(selected.has("Show hidden files")) values.push("'Hidden'=1");
+  if(!values.length) return "";
+  const assignments=values.join(";");
+  const attempts=retry?5:1;
+  return `function Set-UnattendExplorerPreferences { $path='Registry::${root}\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced'; New-Item -Path $path -Force | Out-Null; $values=@{${assignments}}; foreach($entry in $values.GetEnumerator()){ New-ItemProperty -Path $path -Name $entry.Key -PropertyType DWord -Value $entry.Value -Force -ErrorAction Stop | Out-Null; if((Get-ItemPropertyValue -Path $path -Name $entry.Key -ErrorAction Stop) -ne $entry.Value){ throw "Explorer preference verification failed: $($entry.Key)" } } }; for($attempt=0;$attempt -lt ${attempts};$attempt++){ Set-UnattendExplorerPreferences; if($attempt -lt ${attempts-1}){ Start-Sleep -Seconds 1 } }; Remove-Item Function:\\Set-UnattendExplorerPreferences`;
+}
 function perUserCommands(defaultUser=false) {
   const selected=selectedAdvanced(), root=defaultUser?"HKU":"HKCU", prefix=defaultUser?"DefaultUser\\":"", lines=[];
   const add=(name,...commands)=>{if(selected.has(name)) lines.push(...commands);};
   const userReg=(path,name,type,value)=>reg(root,`${prefix}${path}`,name,type,value);
-  add("Always show file extensions",userReg("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced","HideFileExt","REG_DWORD",0));
-  add("Show hidden files",userReg("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced","Hidden","REG_DWORD",1));
   add("Use classic context menu",`reg.exe add '${root}\\${prefix}Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32' /ve /f`);
   add("Open File Explorer to This PC",userReg("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced","LaunchTo","REG_DWORD",1));
   add("Hide taskbar search",userReg("Software\\Microsoft\\Windows\\CurrentVersion\\Search","SearchboxTaskbarMode","REG_DWORD",0));
@@ -388,8 +401,8 @@ function advancedSystemScript() {
   add("No paging file","Get-CimInstance Win32_ComputerSystem | Set-CimInstance -Property @{AutomaticManagedPagefile=$false}","Get-CimInstance Win32_PageFileSetting | Remove-CimInstance -ErrorAction SilentlyContinue");
   add("Enable Windows Sandbox","Enable-WindowsOptionalFeature -Online -FeatureName 'Containers-DisposableClientVM' -All -NoRestart");
   add("Enable Windows Subsystem for Linux","Enable-WindowsOptionalFeature -Online -FeatureName 'Microsoft-Windows-Subsystem-Linux' -All -NoRestart","Enable-WindowsOptionalFeature -Online -FeatureName 'VirtualMachinePlatform' -All -NoRestart");
-  const defaults=perUserCommands(true);
-  if(defaults.length) lines.push("reg.exe load 'HKU\\DefaultUser' 'C:\\Users\\Default\\NTUSER.DAT'",...defaults,"reg.exe unload 'HKU\\DefaultUser'");
+  const defaults=perUserCommands(true), explorerDefaults=explorerPreferencesScript("HKEY_USERS\\DefaultUser");
+  if(defaults.length||explorerDefaults) lines.push("reg.exe load 'HKU\\DefaultUser' 'C:\\Users\\Default\\NTUSER.DAT'",...defaults,...(explorerDefaults?[explorerDefaults]:[]),"reg.exe unload 'HKU\\DefaultUser'");
   if(state.selectedApps.size) lines.push(removalScript());
   lines.push("'System settings complete' | Out-File $log -Append");
   return lines.join(";\r\n");
@@ -400,6 +413,8 @@ function advancedUserScript() {
   const add=(name,...commands)=>{if(selected.has(name)) lines.push(...commands);};
   lines.push(accountCaseScript());
   lines.push(...perUserCommands(false));
+  const explorerPreferences=explorerPreferencesScript("HKEY_CURRENT_USER",true);
+  if(explorerPreferences) lines.push(explorerPreferences);
   const vmScripts={
     "Install VirtualBox Guest Additions":"foreach($d in 'D'..'Z'){ $e=\"${d}:\\VBoxWindowsAdditions.exe\"; if(Test-Path $e){ Start-Process $e -ArgumentList '/with_wddm','/S' -Wait; break } }",
     "Install VMware Tools":"foreach($d in 'D'..'Z'){ $e=\"${d}:\\setup.exe\"; if((Get-Item $e -ErrorAction SilentlyContinue).VersionInfo.ProductName -eq 'VMware Tools'){ Start-Process $e -ArgumentList '/s','/v','/qn REBOOT=R' -Wait; break } }",
@@ -539,7 +554,9 @@ function renderReview() {
 
 function updateOutput() { if (state.page===5) renderReview(); }
 function downloadXml() {
-  const link=document.createElement("a"); link.href=URL.createObjectURL(new Blob([generatedXml()],{type:"application/xml"})); link.download="autounattend.xml"; link.click(); URL.revokeObjectURL(link.href);
+  const link=document.createElement("a"), url=URL.createObjectURL(new Blob([generatedXml()],{type:"application/xml"}));
+  link.href=url; link.download="autounattend.xml"; link.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
 document.addEventListener("click",(event)=>{
