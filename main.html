@@ -3,38 +3,49 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="dark light">
   <title>Unattend Studio</title>
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem("unattend-studio-theme")||"dark"}catch{document.documentElement.dataset.theme="dark"}</script>
   <link rel="stylesheet" href="ui/styles.css">
 </head>
 <body>
   <header class="app-bar">
     <a class="wordmark" href="#" aria-label="Unattend Studio home"><span class="wordmark-icon" aria-hidden="true">U</span><span>Unattend Studio</span></a>
-    <div class="app-bar-actions"><span class="local-label">Local workspace</span><a href="https://github.com/cschneegans/unattend-generator" target="_blank" rel="noreferrer">Source</a></div>
+    <div class="app-bar-actions"><span class="local-label">Local workspace</span><button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to light mode"><span class="theme-label">Night</span><span class="theme-track" aria-hidden="true"><i></i></span></button><a href="https://github.com/cschneegans/unattend-generator" target="_blank" rel="noreferrer">Source</a></div>
   </header>
   <div class="app-shell">
-    <aside class="setup-rail" aria-label="Setup steps">
-      <p class="rail-title">New answer file</p>
-      <ol id="steps">
-        <li class="current"><button type="button" data-go="0"><span>1</span>Setup style</button></li>
-        <li><button type="button" data-go="1"><span>2</span>Basics</button></li>
-        <li><button type="button" data-go="2"><span>3</span>Accounts</button></li>
-        <li><button type="button" data-go="3"><span>4</span>Remove apps</button></li>
-        <li><button type="button" data-go="4"><span>5</span>Advanced</button></li>
-        <li><button type="button" data-go="5"><span>6</span>Output</button></li>
-      </ol>
-      <p class="rail-help">Your settings and downloaded file remain on this computer.</p>
+    <aside class="figure-panel" aria-label="Windows setup illustration">
+      <div class="figure-stage">
+        <div class="logo-figure" role="img" aria-label="Windows 11 logo traced with photo-to-figure">
+          <img class="windows-logo-source" src="ui/assets/windows-11-logo.png" alt="">
+          <svg class="windows-logo-trace" viewBox="0 0 1500 1500" aria-hidden="true">
+            <path class="trace-edge" pathLength="1" d="M1374 1374H782V782h592Z"/>
+            <path class="trace-edge" pathLength="1" d="M717 1374H125V782h592Z"/>
+            <path class="trace-edge" pathLength="1" d="M1374 717H782V125h592Z"/>
+            <path class="trace-edge" pathLength="1" d="M717 717H125V125h592Z"/>
+            <path class="trace-edge trace-fine" pathLength="1" d="M1369 1369H787V787h582Z"/>
+            <path class="trace-edge trace-fine" pathLength="1" d="M712 1369H130V787h582Z"/>
+            <path class="trace-edge trace-fine" pathLength="1" d="M1369 712H787V130h582Z"/>
+            <path class="trace-edge trace-fine" pathLength="1" d="M712 712H130V130h582Z"/>
+          </svg>
+        </div>
+        <p><span>UNATTEND / 01</span>Build a clean Windows installation.</p>
+      </div>
     </aside>
     <main class="work-area">
       <section class="wizard-page active" data-page="0">
         <div class="page-heading"><p>Step 1 of 6</p><h1>Choose a starting point</h1><span>This sets sensible defaults. Every choice can still be changed.</span></div>
-        <div class="profile-list" role="radiogroup" aria-label="Setup style">
+        <div id="profile-list" class="profile-list" role="radiogroup" aria-label="Setup style">
           <div class="profile-option" data-profile-card="minimal"><input id="profile-minimal" type="radio" name="profile" value="minimal"><label for="profile-minimal"><strong>Lean Windows</strong><small>Removes nearly everything Windows does not need to run. Best for experienced users who want the smallest install.</small></label><label class="preconfigured"><input type="checkbox" data-preconfigured="minimal"><span>Preconfigured</span></label></div>
           <div class="profile-option selected" data-profile-card="standard"><input id="profile-standard" type="radio" name="profile" value="standard" checked><label for="profile-standard"><strong>Clean Windows</strong><small>Removes advertising apps and common bloat while keeping core Windows tools and gaming support.</small></label><label class="preconfigured"><input type="checkbox" data-preconfigured="standard"><span>Preconfigured</span></label></div>
           <div class="profile-option" data-profile-card="custom"><input id="profile-custom" type="radio" name="profile" value="custom"><label for="profile-custom"><strong>Custom setup</strong><small>Starts with no removals. Pick every app and setting yourself.</small></label><span class="profile-mode">Manual</span></div>
-          <div class="profile-option disabled" data-profile-card="preset"><input id="profile-preset" type="radio" name="profile" value="preset" disabled><label for="profile-preset"><strong>Presets</strong><small id="preset-description">Save a setup first, then reuse it here.</small></label><span class="profile-mode">Saved locally</span></div>
+          <button id="profile-preset" class="profile-option preset-entry" type="button" data-open-presets aria-controls="preset-panel"><span class="preset-mark" aria-hidden="true"></span><span><strong>Presets</strong><small id="preset-description">Open your saved setups.</small></span><span class="profile-mode">Saved locally</span></button>
         </div>
-        <div class="wizard-actions"><span></span><button class="button primary next" type="button">Continue</button></div>
+        <section id="preset-panel" class="preset-panel" role="tabpanel" aria-labelledby="preset-panel-title" hidden>
+          <div class="preset-panel-heading"><div><p>Setup library</p><h2 id="preset-panel-title" tabindex="-1">Presets</h2></div><button class="text-button quiet" type="button" data-close-presets>Back to setup styles</button></div>
+          <div id="preset-content"></div>
+        </section>
+        <div id="profile-actions" class="wizard-actions"><span></span><button class="button primary next" type="button">Continue</button></div>
       </section>
       <section class="wizard-page" data-page="1">
         <div class="page-heading"><p>Step 2 of 6</p><h1>Windows basics</h1><span>Choose the language and identify this computer.</span></div>
@@ -79,6 +90,18 @@
         <div class="wizard-actions"><button class="button back" type="button">Back</button><div><button class="button" id="save-preset" type="button">Save as preset</button><button class="button" id="copy" type="button">Copy XML</button><button class="button primary" id="finish" type="button">Download file</button></div></div>
       </section>
     </main>
+    <aside class="setup-rail" aria-label="Setup steps">
+      <p class="rail-title">New answer file</p>
+      <ol id="steps">
+        <li class="current"><button type="button" data-go="0"><span>1</span>Setup style</button></li>
+        <li><button type="button" data-go="1"><span>2</span>Basics</button></li>
+        <li><button type="button" data-go="2"><span>3</span>Accounts</button></li>
+        <li><button type="button" data-go="3"><span>4</span>Remove apps</button></li>
+        <li><button type="button" data-go="4"><span>5</span>Advanced</button></li>
+        <li><button type="button" data-go="5"><span>6</span>Output</button></li>
+      </ol>
+      <p class="rail-help">Your settings and downloaded file remain on this computer.</p>
+    </aside>
   </div>
   <script src="ui/app.js"></script>
 </body>

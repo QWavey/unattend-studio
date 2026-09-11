@@ -22,6 +22,7 @@ def browser() -> webdriver.Chrome:
     options.binary_location = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
+    options.add_argument("--window-size=1440,1000")
     options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
     return webdriver.Chrome(options=options)
 
@@ -33,6 +34,23 @@ def main() -> None:
         time.sleep(0.4)
         assert len(driver.find_elements(By.CSS_SELECTOR, "[data-advanced]")) == 42
         assert driver.find_element(By.CSS_SELECTOR, "[data-go='4']").get_attribute("disabled")
+        assert driver.execute_script("return document.documentElement.dataset.theme") == "dark"
+        figure_x = driver.find_element(By.CSS_SELECTOR, ".figure-panel").rect["x"]
+        work_x = driver.find_element(By.CSS_SELECTOR, ".work-area").rect["x"]
+        rail_x = driver.find_element(By.CSS_SELECTOR, ".setup-rail").rect["x"]
+        assert figure_x < work_x < rail_x
+        driver.find_element(By.ID, "theme-toggle").click()
+        assert driver.execute_script("return document.documentElement.dataset.theme") == "light"
+        assert driver.execute_script("return localStorage.getItem('unattend-studio-theme')") == "light"
+        driver.find_element(By.ID, "theme-toggle").click()
+        assert driver.execute_script("return document.documentElement.dataset.theme") == "dark"
+
+        driver.find_element(By.ID, "profile-preset").click()
+        time.sleep(0.25)
+        assert driver.find_element(By.ID, "preset-panel").is_displayed()
+        assert driver.find_element(By.CSS_SELECTOR, ".preset-empty").is_displayed()
+        driver.find_element(By.CSS_SELECTOR, "[data-close-presets]").click()
+        assert driver.find_element(By.ID, "profile-list").is_displayed()
 
         for page in range(2):
             driver.find_elements(By.CSS_SELECTOR, ".next")[page].click()
@@ -46,6 +64,28 @@ def main() -> None:
         assert driver.find_element(By.CSS_SELECTOR, "[data-account-field='password']").get_attribute("value") == "Test123?"
         assert driver.find_element(By.CSS_SELECTOR, "[data-account-field='isAdmin']").is_selected()
         assert not driver.find_elements(By.CSS_SELECTOR, "input[name='output'], #iso-workflow")
+
+        driver.find_element(By.CSS_SELECTOR, "[data-go='2']").click()
+        password = driver.find_element(By.CSS_SELECTOR, "[data-account-field='password']")
+        reveal = driver.find_element(By.CSS_SELECTOR, "[data-toggle-password]")
+        assert password.get_attribute("type") == "password"
+        reveal.click()
+        assert password.get_attribute("type") == "text"
+        assert reveal.get_attribute("aria-label") == "Hide password"
+
+        driver.find_element(By.CSS_SELECTOR, "[data-go='5']").click()
+        driver.find_element(By.CSS_SELECTOR, "[data-page='5'] .back").click()
+        output_step = driver.find_element(By.CSS_SELECTOR, "#steps li:nth-child(6)")
+        assert "returnable" in output_step.get_attribute("class").split()
+        assert not driver.find_element(By.CSS_SELECTOR, "[data-go='5']").get_attribute("disabled")
+        driver.find_element(By.CSS_SELECTOR, "[data-go='5']").click()
+        assert driver.find_element(By.CSS_SELECTOR, ".wizard-page.active").get_attribute("data-page") == "5"
+
+        driver.find_element(By.ID, "edit-setup-name").click()
+        setup_name = driver.find_element(By.ID, "setup-name-input")
+        setup_name.send_keys("Office image")
+        driver.execute_script("document.activeElement.blur()")
+        assert driver.find_element(By.ID, "setup-name").text == "Office image"
 
         driver.execute_script("showPage(4)")
         for name in ("Skip network page automatically", "Sign in automatically once", "Disable telemetry", "Enable Windows Sandbox"):
@@ -103,17 +143,36 @@ def main() -> None:
 
         driver.execute_script("showPage(5)")
         driver.find_element(By.ID, "save-preset").click()
-        assert not driver.find_element(By.ID, "profile-preset").get_attribute("disabled")
+        assert "has-preset" in driver.find_element(By.ID, "profile-preset").get_attribute("class").split()
         assert driver.execute_script("return JSON.parse(localStorage.getItem('unattend-studio-preset-v1')).accounts[0].name") == "Admin"
+        assert driver.execute_script("return JSON.parse(localStorage.getItem('unattend-studio-preset-v1')).setupName") == "Office image"
 
         driver.refresh()
         time.sleep(0.4)
         driver.find_element(By.ID, "profile-preset").click()
+        time.sleep(0.25)
+        assert driver.find_element(By.ID, "preset-panel").is_displayed()
+        assert driver.find_element(By.CSS_SELECTOR, ".saved-preset-card h3").text == "Office image"
+        driver.find_element(By.CSS_SELECTOR, "[data-load-preset]").click()
         assert driver.find_element(By.CSS_SELECTOR, "[data-account-field='name']").get_attribute("value") == "Admin"
         assert driver.execute_script("return state.profile") == "preset"
+        assert driver.execute_script("return state.setupName") == "Office image"
+
+        driver.execute_script("showPage(0)")
+        driver.find_element(By.ID, "profile-preset").click()
+        time.sleep(0.25)
+        assert driver.find_element(By.CSS_SELECTOR, "[data-delete-preset]").is_displayed()
+        driver.execute_script("window.confirm=()=>true")
+        driver.find_element(By.CSS_SELECTOR, "[data-delete-preset]").click()
+        assert driver.execute_script("return localStorage.getItem('unattend-studio-preset-v1')") is None
+        assert driver.find_element(By.CSS_SELECTOR, ".preset-empty").is_displayed()
+        assert driver.find_element(By.ID, "profile-custom").is_selected()
+
         driver.execute_script("localStorage.setItem('unattend-studio-preset-v1','not-json')")
         driver.refresh()
-        assert driver.find_element(By.ID, "profile-preset").get_attribute("disabled")
+        driver.find_element(By.ID, "profile-preset").click()
+        time.sleep(0.25)
+        assert driver.find_element(By.CSS_SELECTOR, ".preset-empty").is_displayed()
 
         severe = [entry for entry in driver.get_log("browser") if entry["level"] == "SEVERE" and "favicon.ico" not in entry["message"]]
         assert not severe, severe

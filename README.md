@@ -53,6 +53,10 @@ python tests/ui_smoke.py http://127.0.0.1:PORT/main.html
 
 The smoke test covers navigation, account validation, presets, all advanced controls, XML parsing, exact account-name casing, and OOBE skipping.
 
+## Interface artwork
+
+The setup screen uses the public-domain geometric Windows 11 mark from [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Windows_logo_-_2021.svg). Its animated line figure was extracted locally with QWavey's [photo-to-figure](https://github.com/QWavey/photo-to-figure) tracer. The Windows name and logo may still be protected as trademarks.
+
 ## Original library and license
 
 The original .NET source remains in this repository for compatibility and reference. See `Example.cs` for its programmatic API.

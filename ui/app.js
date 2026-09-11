@@ -6,10 +6,11 @@ const state = {
   page: 0,
   completed: new Set(),
   profile: "standard",
+  setupName: "",
   preconfigured: false,
   catalog: [],
   selectedApps: new Set(),
-  accounts: [{ id: crypto.randomUUID(), name: "", password: "", isAdmin: true }]
+  accounts: [{ id: crypto.randomUUID(), name: "", password: "", isAdmin: true, passwordVisible: false }]
 };
 
 const coreApps = new Set(["Microsoft Store","Calculator","Photos","Paint","Notepad (modern)","Windows Terminal","Snipping Tool"]);
@@ -58,7 +59,8 @@ function updateStepNavigation() {
     const isCurrent = i === state.page;
     const isComplete = state.completed.has(i);
     step.classList.toggle("current", isCurrent);
-    step.classList.toggle("complete", isComplete && !isCurrent);
+    step.classList.toggle("complete", isComplete && i < state.page);
+    step.classList.toggle("returnable", isComplete && i > state.page);
     const button = step.querySelector("button");
     button.disabled = !isCurrent && !isComplete;
     button.setAttribute("aria-disabled", String(button.disabled));
@@ -70,6 +72,7 @@ function showPage(index) {
   const oldPage = document.querySelector(".wizard-page.active");
   const newPage = document.querySelector(`[data-page="${next}"]`);
   state.page = next;
+  if (next === 5) state.completed.add(5);
   document.querySelectorAll(".wizard-page").forEach((page) => page.classList.toggle("active", page === newPage));
   updateStepNavigation();
   if (!reducedMotion() && oldPage !== newPage) newPage.animate([{opacity:0,transform:"translateX(8px)"},{opacity:1,transform:"translateX(0)"}],{duration:220,easing:"cubic-bezier(.2,.8,.2,1)"});
@@ -91,6 +94,7 @@ function applyPreset(preset) {
 
 function selectProfile(profile) {
   state.profile = profile;
+  state.setupName = "";
   document.querySelectorAll(".profile-option").forEach((card) => card.classList.toggle("selected", card.dataset.profileCard === profile));
   if (profile === "preset") return;
   if (state.catalog.length) applyPreset(profile === "standard" ? "recommended" : profile === "minimal" ? "minimal" : "none");
@@ -100,19 +104,52 @@ function savedPreset() {
   try { const value=localStorage.getItem("unattend-studio-preset-v1"); return value?JSON.parse(value):null; } catch { return null; }
 }
 function updatePresetChoice() {
-  const exists=Boolean(savedPreset()), input=$("profile-preset"), card=document.querySelector('[data-profile-card="preset"]');
-  input.disabled=!exists; card.classList.toggle("disabled",!exists);
-  $("preset-description").textContent=exists?"Load your saved accounts, app removals and advanced settings.":"Save a setup first, then reuse it here.";
+  const exists=Boolean(savedPreset());
+  $("preset-description").textContent=exists?"Open your saved Windows setup.":"No saved setup yet. Open to learn how to create one.";
+  $("profile-preset").classList.toggle("has-preset",exists);
+  if (!$("preset-panel").hidden) renderPresetPanel();
+}
+function renderPresetPanel() {
+  const preset=savedPreset(), content=$("preset-content");
+  if(!preset){content.innerHTML='<div class="preset-empty"><strong>No presets saved yet</strong><span>Complete a setup and choose “Save as preset” on the Output page. It will appear here on this computer.</span></div>';return;}
+  const name=String(preset.setupName||profileDisplayName()).trim()||"Saved Windows setup";
+  const accountCount=Array.isArray(preset.accounts)?preset.accounts.length:0;
+  const appCount=Array.isArray(preset.apps)?preset.apps.length:0;
+  content.innerHTML=`<article class="saved-preset-card"><div><h3>${escapeXml(name)}</h3><p>${accountCount} account${accountCount===1?"":"s"} · ${appCount} app removal${appCount===1?"":"s"} · Saved locally</p></div><div class="preset-card-actions"><button class="button danger" type="button" data-delete-preset>Delete</button><button class="button primary" type="button" data-load-preset>Use preset</button></div></article>`;
+}
+function openPresetPanel() {
+  renderPresetPanel();
+  $("profile-list").hidden=true; $("profile-actions").hidden=true; $("preset-panel").hidden=false;
+  $("preset-panel-title").focus?.();
+}
+function closePresetPanel() { $("preset-panel").hidden=true; $("profile-list").hidden=false; $("profile-actions").hidden=false; }
+function useSavedPreset() {
+  if(!savedPreset()) return;
+  state.profile="preset";
+  document.querySelectorAll("input[name=profile]").forEach((input)=>{input.checked=false;});
+  document.querySelectorAll(".profile-option").forEach((card)=>card.classList.toggle("selected",card.id==="profile-preset"));
+  loadPreset(); closePresetPanel();
+}
+function deleteSavedPreset() {
+  if(!savedPreset()||!confirm("Delete this saved preset? This cannot be undone.")) return;
+  try{localStorage.removeItem("unattend-studio-preset-v1");}catch{return;}
+  if(state.profile==="preset"){
+    state.profile="custom"; state.setupName="";
+    const custom=$("profile-custom"); if(custom) custom.checked=true;
+    document.querySelectorAll(".profile-option").forEach((card)=>card.classList.toggle("selected",card.dataset.profileCard==="custom"));
+  }
+  updatePresetChoice(); renderPresetPanel();
 }
 function capturePreset() {
-  return {version:1,profile:state.profile,language:$("language").value,keyboard:$("keyboard").value,computer:$("computer").value,architecture:$("architecture").value,eula:$("eula").checked,network:$("network").checked,accounts:state.accounts.map(({name,password,isAdmin})=>({name,password,isAdmin})),apps:[...state.selectedApps],advanced:[...selectedAdvanced()],paging:{initial:$("pagefile-initial")?.value,maximum:$("pagefile-maximum")?.value}};
+  return {version:1,profile:state.profile,setupName:state.setupName,language:$("language").value,keyboard:$("keyboard").value,computer:$("computer").value,architecture:$("architecture").value,eula:$("eula").checked,network:$("network").checked,accounts:state.accounts.map(({name,password,isAdmin})=>({name,password,isAdmin})),apps:[...state.selectedApps],advanced:[...selectedAdvanced()],paging:{initial:$("pagefile-initial")?.value,maximum:$("pagefile-maximum")?.value}};
 }
 function loadPreset() {
   const preset=savedPreset(); if(!preset) { updatePresetChoice(); return; }
+  state.setupName=String(preset.setupName||"").trim().slice(0,60);
   $("language").value=preset.language||"en-US"; $("keyboard").value=preset.keyboard||"en-US"; $("computer").value=preset.computer||""; $("architecture").value=preset.architecture||"amd64";
   $("eula").checked=preset.eula!==false; $("network").checked=preset.network!==false;
-  state.accounts=(preset.accounts||[]).slice(0,5).map((account)=>({id:crypto.randomUUID(),name:String(account.name||""),password:String(account.password||""),isAdmin:Boolean(account.isAdmin)}));
-  if(!state.accounts.length) state.accounts=[{id:crypto.randomUUID(),name:"",password:"",isAdmin:true}];
+  state.accounts=(preset.accounts||[]).slice(0,5).map((account)=>({id:crypto.randomUUID(),name:String(account.name||""),password:String(account.password||""),isAdmin:Boolean(account.isAdmin),passwordVisible:false}));
+  if(!state.accounts.length) state.accounts=[{id:crypto.randomUUID(),name:"",password:"",isAdmin:true,passwordVisible:false}];
   const savedApps=preset.apps||[];
   state.selectedApps=new Set(state.catalog.length?savedApps.filter((name)=>state.catalog.some((app)=>appKey(app)===name)):savedApps);
   document.querySelectorAll("[data-advanced]").forEach((input)=>{input.checked=(preset.advanced||[]).includes(input.dataset.advanced);input.closest(".option-wrap")?.classList.toggle("enabled",input.checked);});
@@ -126,14 +163,14 @@ function usePreconfiguredProfile(profile, checked) {
   document.querySelectorAll("[data-preconfigured]").forEach((input) => { if (input.dataset.preconfigured !== profile) input.checked = false; });
   state.preconfigured = checked;
   if (!checked) {
-    if (!state.accounts.length) state.accounts = [{id:crypto.randomUUID(),name:"",password:"",isAdmin:true}];
+    if (!state.accounts.length) state.accounts = [{id:crypto.randomUUID(),name:"",password:"",isAdmin:true,passwordVisible:false}];
     renderAccounts();
     return;
   }
   const radio = document.querySelector(`input[name="profile"][value="${profile}"]`);
   radio.checked = true;
   selectProfile(profile);
-  state.accounts = [{id:crypto.randomUUID(),name:"Test",password:"Test123?",isAdmin:true}];
+  state.accounts = [{id:crypto.randomUUID(),name:"Test",password:"Test123?",isAdmin:true,passwordVisible:false}];
   renderAccounts();
   state.completed = new Set([0,1,2,3,4]);
   showPage(5);
@@ -145,7 +182,7 @@ function renderAccounts() {
       <div class="account-heading"><h2>Account ${index + 1}</h2>${state.accounts.length > 1 ? `<button type="button" class="remove-account" data-remove-account="${account.id}">Remove</button>` : ""}</div>
       <div class="field-grid">
         <label>Account name<input type="text" data-account-field="name" value="${escapeXml(account.name)}" placeholder="${index === 0 ? "Alex" : "Account name"}" autocomplete="off"></label>
-        <label>Password<input type="password" data-account-field="password" value="${escapeXml(account.password)}" placeholder="Optional" autocomplete="new-password"><small>Visible as plain text inside the XML file.</small></label>
+        <label>Password<div class="password-control"><input type="${account.passwordVisible?"text":"password"}" data-account-field="password" value="${escapeXml(account.password)}" placeholder="Required" autocomplete="new-password"><button type="button" class="password-toggle ${account.passwordVisible?"visible":""}" data-toggle-password="${account.id}" aria-label="${account.passwordVisible?"Hide":"Show"} password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-5 9.5-5 9.5 5 9.5 5-3.5 5-9.5 5-9.5-5-9.5-5Z"/><circle cx="12" cy="12" r="2.5"/><path class="eye-slash" d="m5 4 14 16"/></svg></button></div><small>Stored as plain text inside the XML file.</small></label>
       </div>
       <label class="admin-check"><input type="checkbox" data-account-field="isAdmin" ${account.isAdmin ? "checked" : ""}><span><strong>Is administrator</strong><small>Can install software and change system settings.</small></span></label>
     </section>`).join("");
@@ -382,12 +419,27 @@ function validateStep(page) {
 
 function validateConfiguration() { return validateBasics() && validateAccounts() && validateAdvanced(); }
 
+function profileDisplayName() { return {minimal:"Lean Windows",standard:"Clean Windows",custom:"Custom setup",preset:"Saved preset"}[state.profile]||"Custom setup"; }
+function commitSetupName(input) {
+  if(!input?.isConnected) return;
+  state.setupName=input.value.trim().slice(0,60);
+  renderReview();
+}
+function editSetupName() {
+  const value=state.setupName||profileDisplayName(), valueCell=$("setup-name")?.parentElement;
+  if(!valueCell) return;
+  valueCell.innerHTML=`<label class="sr-only" for="setup-name-input">Setup name</label><input id="setup-name-input" class="setup-name-input" type="text" maxlength="60" value="${escapeXml(value)}">`;
+  const input=$("setup-name-input"); input.focus(); input.select();
+  input.addEventListener("blur",()=>commitSetupName(input),{once:true});
+  input.addEventListener("keydown",(event)=>{if(event.key==="Enter"){event.preventDefault();commitSetupName(input);}if(event.key==="Escape"){event.preventDefault();renderReview();}});
+}
+
 function renderReview() {
   const adminCount=state.accounts.filter((account)=>account.isAdmin).length;
   const accountSummary=state.accounts.length?`${state.accounts.length} (${adminCount} administrator${adminCount===1?"":"s"})`:"Create during Windows setup";
-  const profileName={minimal:"Lean Windows",standard:"Clean Windows",custom:"Custom setup",preset:"Saved preset"}[state.profile]||"Custom setup";
-  const rows=[["Setup style",profileName],["Computer",$("computer").value.trim()||"DESKTOP-PC"],["Accounts",accountSummary],["Apps removed",String(state.selectedApps.size)],["Advanced changes",String(document.querySelectorAll("[data-advanced]:checked").length)]];
-  $("review").innerHTML=rows.map(([term,value])=>`<div class="review-row"><dt>${escapeXml(term)}</dt><dd>${escapeXml(value)}</dd></div>`).join("");
+  const setupName=state.setupName||profileDisplayName();
+  const rows=[["Computer",$("computer").value.trim()||"DESKTOP-PC"],["Accounts",accountSummary],["Apps removed",String(state.selectedApps.size)],["Advanced changes",String(document.querySelectorAll("[data-advanced]:checked").length)]];
+  $("review").innerHTML=`<div class="review-row"><dt>Setup style</dt><dd class="editable-value"><span id="setup-name">${escapeXml(setupName)}</span><button id="edit-setup-name" class="edit-name" type="button" aria-label="Rename setup"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15.5 5.5 3 3M5 19l3.8-.8L19 7a1.4 1.4 0 0 0 0-2l0 0a1.4 1.4 0 0 0-2 0L5.8 15.2 5 19Z"/></svg></button></dd></div>${rows.map(([term,value])=>`<div class="review-row"><dt>${escapeXml(term)}</dt><dd>${escapeXml(value)}</dd></div>`).join("")}`;
   $("preview").textContent=generatedXml();
 }
 
@@ -397,11 +449,13 @@ function downloadXml() {
 }
 
 document.addEventListener("click",(event)=>{
-  const next=event.target.closest(".next"), back=event.target.closest(".back"), go=event.target.closest("[data-go]"), remove=event.target.closest("[data-remove-account]");
+  const next=event.target.closest(".next"), back=event.target.closest(".back"), go=event.target.closest("[data-go]"), remove=event.target.closest("[data-remove-account]"), passwordToggle=event.target.closest("[data-toggle-password]"), editName=event.target.closest("#edit-setup-name");
   if (next && validateStep(state.page)) { state.completed.add(state.page); showPage(state.page+1); }
   if (back) showPage(state.page-1);
   if (go) { const target=Number(go.dataset.go); if ((target===state.page || state.completed.has(target)) && (target<=state.page || validateConfiguration())) showPage(target); }
   if (remove) { state.accounts=state.accounts.filter((account)=>account.id!==remove.dataset.removeAccount); renderAccounts(); updateOutput(); }
+  if (passwordToggle) { const account=state.accounts.find((item)=>item.id===passwordToggle.dataset.togglePassword); const input=passwordToggle.parentElement.querySelector("input"); if(account&&input){account.passwordVisible=!account.passwordVisible;input.type=account.passwordVisible?"text":"password";passwordToggle.classList.toggle("visible",account.passwordVisible);passwordToggle.setAttribute("aria-label",`${account.passwordVisible?"Hide":"Show"} password`);} }
+  if (editName) { event.preventDefault(); editSetupName(); }
 });
 document.addEventListener("input",(event)=>{
   const app=event.target.closest("[data-app]");
@@ -416,14 +470,20 @@ document.addEventListener("input",(event)=>{
     advanced.closest(".option-wrap")?.classList.toggle("enabled",advanced.checked); updateOutput();
   }
 });
-document.querySelectorAll("input[name=profile]").forEach((input)=>input.addEventListener("change",()=>{ document.querySelectorAll("[data-preconfigured]").forEach((box)=>{box.checked=false;}); state.preconfigured=false; if(!state.accounts.length){state.accounts=[{id:crypto.randomUUID(),name:"",password:"",isAdmin:true}];renderAccounts();} selectProfile(input.value); if(input.value==="preset") loadPreset(); }));
+document.querySelectorAll("input[name=profile]").forEach((input)=>input.addEventListener("change",()=>{ document.querySelectorAll("[data-preconfigured]").forEach((box)=>{box.checked=false;}); state.preconfigured=false; if(!state.accounts.length){state.accounts=[{id:crypto.randomUUID(),name:"",password:"",isAdmin:true,passwordVisible:false}];renderAccounts();} selectProfile(input.value); }));
 document.querySelectorAll("[data-preconfigured]").forEach((input)=>input.addEventListener("change",()=>usePreconfiguredProfile(input.dataset.preconfigured,input.checked)));
 document.querySelectorAll("[data-preset]").forEach((button)=>button.addEventListener("click",()=>applyPreset(button.dataset.preset)));
-$("add-account").addEventListener("click",()=>{ if (state.accounts.length>=5) return; state.accounts.push({id:crypto.randomUUID(),name:"",password:"",isAdmin:false}); renderAccounts(); requestAnimationFrame(()=>$("accounts").lastElementChild?.querySelector("input")?.focus()); });
+$("profile-preset").addEventListener("click",openPresetPanel);
+document.querySelector("[data-close-presets]").addEventListener("click",closePresetPanel);
+$("preset-content").addEventListener("click",(event)=>{if(event.target.closest("[data-load-preset]"))useSavedPreset();if(event.target.closest("[data-delete-preset]"))deleteSavedPreset();});
+$("theme-toggle").addEventListener("click",()=>{const theme=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=theme;try{localStorage.setItem("unattend-studio-theme",theme);}catch{}updateThemeToggle();});
+$("add-account").addEventListener("click",()=>{ if (state.accounts.length>=5) return; state.accounts.push({id:crypto.randomUUID(),name:"",password:"",isAdmin:false,passwordVisible:false}); renderAccounts(); requestAnimationFrame(()=>$("accounts").lastElementChild?.querySelector("input")?.focus()); });
 $("app-search").addEventListener("input",renderAppList);
 $("copy").addEventListener("click",async()=>{ await navigator.clipboard.writeText(generatedXml()); $("copy").textContent="Copied"; setTimeout(()=>{$("copy").textContent="Copy XML";},1200); });
 $("save-preset").addEventListener("click",()=>{ if(!validateConfiguration()) return; try{localStorage.setItem("unattend-studio-preset-v1",JSON.stringify(capturePreset()));updatePresetChoice();$("save-preset").textContent="Preset saved";setTimeout(()=>{$("save-preset").textContent="Save as preset";},1400);}catch{alert("This browser did not allow the preset to be saved locally.");} });
 $("finish").addEventListener("click",()=>{ if (validateConfiguration()) downloadXml(); });
 
-renderAccounts(); renderAdvancedOptions(); updatePresetChoice(); updateStepNavigation();
+function updateThemeToggle(){const dark=document.documentElement.dataset.theme==="dark";$("theme-toggle").setAttribute("aria-label",`Switch to ${dark?"light":"dark"} mode`);$("theme-toggle").setAttribute("aria-pressed",String(dark));$("theme-toggle").querySelector(".theme-label").textContent=dark?"Night":"Day";}
+
+renderAccounts(); renderAdvancedOptions(); updatePresetChoice(); updateStepNavigation(); updateThemeToggle();
 fetch("resource/Bloatware.json").then((response)=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json();}).then((catalog)=>{state.catalog=catalog.sort((a,b)=>a.DisplayName.localeCompare(b.DisplayName));if(state.profile==="preset"){state.selectedApps=new Set([...state.selectedApps].filter((name)=>state.catalog.some((app)=>appKey(app)===name)));renderAppList();}else selectProfile(state.profile);}).catch((error)=>{$("bloatware-list").innerHTML=`<p class="loading">Could not load the local app catalog (${escapeXml(error.message)}). Start with <code>python main.py</code>.</p>`;});
