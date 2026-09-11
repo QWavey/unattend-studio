@@ -32,6 +32,8 @@ const de = {
   "Prevent automatic device encryption":"Automatische Geräteverschlüsselung verhindern","Disable Windows Defender":"Windows Defender deaktivieren","Disable SmartScreen":"SmartScreen deaktivieren","Disable telemetry":"Telemetrie deaktivieren","Disable activity history":"Aktivitätsverlauf deaktivieren","Disable advertising ID":"Werbe-ID deaktivieren","Disable app launch tracking":"App-Startverfolgung deaktivieren","Disable location services":"Ortungsdienste deaktivieren",
   "Always show file extensions":"Dateierweiterungen immer anzeigen","Show hidden files":"Versteckte Dateien anzeigen","Use classic context menu":"Klassisches Kontextmenü verwenden","Open File Explorer to This PC":"Datei-Explorer mit „Dieser PC“ öffnen","Hide taskbar search":"Taskleistensuche ausblenden","Hide widgets":"Widgets ausblenden","Remove Start menu pins":"Startmenü-Anheftungen entfernen","Disable Windows Spotlight":"Windows-Blickpunkt deaktivieren",
   "Disable hibernation":"Ruhezustand deaktivieren","Disable first-logon animation":"Animation bei erster Anmeldung deaktivieren","Disable automatic driver delivery":"Automatische Treiberbereitstellung deaktivieren","Prevent update restarts while signed in":"Update-Neustarts während der Anmeldung verhindern","Disable Delivery Optimization":"Übermittlungsoptimierung deaktivieren","Enable Windows Sandbox":"Windows Sandbox aktivieren","Enable Windows Subsystem for Linux":"Windows-Subsystem für Linux aktivieren",
+  "Enable Developer Mode":"Entwicklermodus aktivieren","Allows development, debugging and installation of trusted unpackaged apps.":"Erlaubt Entwicklung, Debugging und die Installation vertrauenswürdiger ungepackter Apps.",
+  "Create and open a setup report":"Setup-Bericht erstellen und öffnen","After setup commands finish, save":"Nach Abschluss der Setup-Befehle wird","to the desktop and open it automatically.":"auf dem Desktop gespeichert und automatisch geöffnet.",
   "Install VirtualBox Guest Additions":"VirtualBox-Gasterweiterungen installieren","Install VMware Tools":"VMware Tools installieren","Install VirtIO tools":"VirtIO-Werkzeuge installieren","Install Parallels Tools":"Parallels Tools installieren",
   "Opens a command prompt before Setup continues.":"Öffnet eine Eingabeaufforderung, bevor das Setup fortfährt.","Windows Setup asks for a product key.":"Windows Setup fragt nach einem Produktschlüssel.","Lets Setup use the key stored in UEFI firmware.":"Erlaubt dem Setup, den in der UEFI-Firmware gespeicherten Schlüssel zu verwenden.","Shows the edition picker instead of choosing an image silently.":"Zeigt die Editionsauswahl, statt ein Abbild automatisch auszuwählen.","Skips TPM, Secure Boot, RAM and CPU checks.":"Überspringt Prüfungen für TPM, Secure Boot, RAM und CPU.","Makes the local-account path available during OOBE.":"Macht die Einrichtung mit lokalem Konto während OOBE verfügbar.","Skips the connection page and continues with the local account.":"Überspringt die Verbindungsseite und fährt mit dem lokalen Konto fort.","Uses the first local account for the initial sign-in, then disables automatic sign-in.":"Verwendet das erste lokale Konto für die erste Anmeldung und deaktiviert danach die automatische Anmeldung.","Runs customization scripts without visible console windows.":"Führt Anpassungsskripte ohne sichtbare Konsolenfenster aus.",
   "Erases disk 0 and installs to its available partition.":"Löscht Datenträger 0 und installiert auf der verfügbaren Partition.","Uses GPT for UEFI and MBR for legacy BIOS. Requires disk wiping.":"Verwendet GPT für UEFI und MBR für Legacy-BIOS. Erfordert das Löschen des Datenträgers.","Enables WinRE after Windows is installed.":"Aktiviert WinRE nach der Windows-Installation.","Disables WinRE and removes its recovery image.":"Deaktiviert WinRE und entfernt das Wiederherstellungsabbild.","Sets a fixed initial and maximum paging-file size.":"Legt feste Anfangs- und Maximalgrößen für die Auslagerungsdatei fest.","Disables automatic paging-file management.":"Deaktiviert die automatische Verwaltung der Auslagerungsdatei.",
@@ -61,7 +63,7 @@ const advancedGroups = {
   "Disk and recovery":["Wipe and partition target disk","Automatic GPT or MBR layout","Install Windows Recovery Environment","Remove Windows Recovery Environment","Custom paging file","No paging file"],
   "Privacy and security":["Prevent automatic device encryption","Disable Windows Defender","Disable SmartScreen","Disable telemetry","Disable activity history","Disable advertising ID","Disable app launch tracking","Disable location services"],
   "Desktop and taskbar":["Always show file extensions","Show hidden files","Use classic context menu","Open File Explorer to This PC","Hide taskbar search","Hide widgets","Remove Start menu pins","Disable Windows Spotlight"],
-  "System":["Disable hibernation","Disable first-logon animation","Disable automatic driver delivery","Prevent update restarts while signed in","Disable Delivery Optimization","Enable Windows Sandbox","Enable Windows Subsystem for Linux"],
+  "System":["Disable hibernation","Disable first-logon animation","Disable automatic driver delivery","Prevent update restarts while signed in","Disable Delivery Optimization","Enable Developer Mode","Enable Windows Sandbox","Enable Windows Subsystem for Linux"],
   "Virtual machine tools":["Install VirtualBox Guest Additions","Install VMware Tools","Install VirtIO tools","Install Parallels Tools"]
 };
 const advancedHelp = {
@@ -81,6 +83,7 @@ const advancedHelp = {
   "Custom paging file":"Sets a fixed initial and maximum paging-file size.",
   "No paging file":"Disables automatic paging-file management.",
   "Disable Windows Defender":"Disables Microsoft Defender services and policy protection.",
+  "Enable Developer Mode":"Allows development, debugging and installation of trusted unpackaged apps.",
   "Enable Windows Sandbox":"Enables the disposable Windows Sandbox feature. Pro or Enterprise is required.",
   "Enable Windows Subsystem for Linux":"Enables the WSL optional feature. A Linux distribution is not installed.",
   "Install VirtualBox Guest Additions":"Installs from an attached Guest Additions ISO on first sign-in.",
@@ -96,7 +99,7 @@ const exclusiveAdvanced = {
 const advancedPresets = {
   recommended:["Allow setup without internet","Skip network page automatically","Disable telemetry","Disable activity history","Disable advertising ID","Disable app launch tracking","Always show file extensions","Use classic context menu","Hide widgets","Disable Windows Spotlight","Prevent update restarts while signed in","Disable Delivery Optimization"],
   privacy:["Disable telemetry","Disable activity history","Disable advertising ID","Disable app launch tracking","Disable location services","Disable Windows Spotlight","Disable Delivery Optimization"],
-  developer:["Always show file extensions","Show hidden files","Use classic context menu","Open File Explorer to This PC","Prevent update restarts while signed in","Enable Windows Sandbox","Enable Windows Subsystem for Linux"],
+  developer:["Always show file extensions","Show hidden files","Use classic context menu","Open File Explorer to This PC","Prevent update restarts while signed in","Enable Developer Mode","Enable Windows Sandbox","Enable Windows Subsystem for Linux"],
   "virtual-machine":["Bypass Windows 11 requirements","Allow setup without internet","Skip network page automatically","Sign in automatically once","Hide PowerShell windows","Disable hibernation","Disable first-logon animation"],
   none:[]
 };
@@ -228,13 +231,14 @@ function deleteSavedPreset() {
   updatePresetChoice(); renderPresetPanel();
 }
 function capturePreset() {
-  return {version:1,profile:state.profile,setupName:state.setupName,language:$("language").value,keyboard:$("keyboard").value,computer:$("computer").value,architecture:$("architecture").value,eula:$("eula").checked,network:$("network").checked,accounts:state.accounts.map(({name,password,isAdmin})=>({name,password,isAdmin})),apps:[...state.selectedApps],advanced:[...selectedAdvanced()],paging:{initial:$("pagefile-initial")?.value,maximum:$("pagefile-maximum")?.value}};
+  return {version:1,profile:state.profile,setupName:state.setupName,language:$("language").value,keyboard:$("keyboard").value,computer:$("computer").value,architecture:$("architecture").value,eula:$("eula").checked,network:$("network").checked,commandReport:$("command-report").checked,accounts:state.accounts.map(({name,password,isAdmin})=>({name,password,isAdmin})),apps:[...state.selectedApps],advanced:[...selectedAdvanced()],paging:{initial:$("pagefile-initial")?.value,maximum:$("pagefile-maximum")?.value}};
 }
 function loadPreset() {
   const preset=savedPreset(); if(!preset) { updatePresetChoice(); return; }
   state.setupName=String(preset.setupName||"").trim().slice(0,60);
   $("language").value=preset.language||"en-US"; $("keyboard").value=preset.keyboard||"en-US"; $("computer").value=preset.computer||""; $("architecture").value=preset.architecture||"amd64";
   $("eula").checked=preset.eula!==false; $("network").checked=preset.network!==false;
+  $("command-report").checked=Boolean(preset.commandReport);
   state.accounts=(preset.accounts||[]).slice(0,5).map((account)=>({id:crypto.randomUUID(),name:String(account.name||""),password:String(account.password||""),isAdmin:Boolean(account.isAdmin),passwordVisible:false}));
   if(!state.accounts.length) state.accounts=[{id:crypto.randomUUID(),name:"",password:"",isAdmin:true,passwordVisible:false}];
   const savedApps=preset.apps||[];
@@ -360,12 +364,28 @@ function accountCaseScript() {
   return `function Set-UnattendCaseFix { param([string]$DesiredName); $account=Get-LocalUser -Name $DesiredName -ErrorAction SilentlyContinue; if($account -and $account.Name -cne $DesiredName){$temporary='_ugCase_'+$account.SID.Value.Split('-')[-1];Rename-LocalUser -SID $account.SID -NewName $temporary;Rename-LocalUser -Name $temporary -NewName $DesiredName} };\r\n${calls};\r\nRemove-Item Function:\\Set-UnattendCaseFix`;
 }
 
+function trackedPowerShellStep(name,commands) {
+  return `Invoke-UnattendCommand -Name ${quotePowerShell(name)} -Action { ${commands.join(";\r\n")} }`;
+}
+function commandTrackingPrelude() {
+  return "$commandResults=[System.Collections.Generic.List[object]]::new(); function Invoke-UnattendCommand { param([string]$Name,[scriptblock]$Action); $before=$global:Error.Count; $global:LASTEXITCODE=0; try { & $Action; if($global:Error.Count -gt $before){ throw $global:Error[0] }; if($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0){ throw \"Native command exited with code $LASTEXITCODE\" }; $commandResults.Add([pscustomobject]@{Name=$Name;Status='Passed';Detail=''}) } catch { $commandResults.Add([pscustomobject]@{Name=$Name;Status='Failed';Detail=$_.Exception.Message}) } }";
+}
+function commandTrackingSave(path) {
+  return `$commandResults | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath ${quotePowerShell(path)} -Encoding UTF8`;
+}
+function completionReportScript() {
+  return `$resultFiles=@('C:\\Windows\\Setup\\Scripts\\UnattendStudio-System-results.json','C:\\Windows\\Setup\\Scripts\\UnattendStudio-User-results.json'); $results=@(); foreach($resultFile in $resultFiles){ if(Test-Path -LiteralPath $resultFile){ try { $results+=@(Get-Content -LiteralPath $resultFile -Raw | ConvertFrom-Json) } catch { $results+=[pscustomobject]@{Name=(Split-Path $resultFile -Leaf);Status='Failed';Detail=$_.Exception.Message} } } }; if(!$results.Count){$results=@([pscustomobject]@{Name='No tracked setup commands';Status='Passed';Detail=''})}; Add-Type -AssemblyName System.Drawing; $width=1400; $rowHeight=46; $height=[Math]::Max(360,180+($results.Count*$rowHeight)); $bitmap=[System.Drawing.Bitmap]::new($width,$height); $graphics=[System.Drawing.Graphics]::FromImage($bitmap); $graphics.SmoothingMode='AntiAlias'; $graphics.Clear([System.Drawing.Color]::FromArgb(18,21,24)); $titleFont=[System.Drawing.Font]::new('Segoe UI',28,[System.Drawing.FontStyle]::Bold); $bodyFont=[System.Drawing.Font]::new('Segoe UI',14); $smallFont=[System.Drawing.Font]::new('Segoe UI',10); $white=[System.Drawing.Brushes]::White; $muted=[System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(170,180,188)); $graphics.DrawString('Windows setup command report',$titleFont,$white,48,38); $passed=@($results|Where-Object Status -eq 'Passed').Count; $failed=@($results|Where-Object Status -eq 'Failed').Count; $graphics.DrawString(\"$passed passed  |  $failed failed\",$bodyFont,$muted,50,92); $y=146; foreach($result in $results){ $ok=$result.Status -eq 'Passed'; $color=if($ok){[System.Drawing.Color]::FromArgb(72,190,125)}else{[System.Drawing.Color]::FromArgb(235,92,92)}; $brush=[System.Drawing.SolidBrush]::new($color); $graphics.FillEllipse($brush,51,$y+7,14,14); $graphics.DrawString([string]$result.Name,$bodyFont,$white,82,$y); if(!$ok -and $result.Detail){$detail=([string]$result.Detail -replace '[\\r\\n]+',' ');if($detail.Length -gt 120){$detail=$detail.Substring(0,117)+'...'};$graphics.DrawString($detail,$smallFont,$muted,620,$y+3)}; $brush.Dispose(); $y+=$rowHeight }; $desktop=[Environment]::GetFolderPath('Desktop'); $reportPath=Join-Path $desktop 'Completed_commands.png'; $bitmap.Save($reportPath,[System.Drawing.Imaging.ImageFormat]::Png); $graphics.Dispose(); $bitmap.Dispose(); $titleFont.Dispose(); $bodyFont.Dispose(); $smallFont.Dispose(); $muted.Dispose(); Start-Process -FilePath $reportPath`;
+}
+
 function advancedSystemScript() {
-  const selected=selectedAdvanced(), lines=["$ErrorActionPreference = 'Continue'","$log = 'C:\\Windows\\Setup\\Scripts\\UnattendStudio-System.log'","'Applying system settings' | Out-File $log"];
-  const add=(name,...commands)=>{if(selected.has(name)) lines.push(...commands);};
-  if($("network").checked) lines.push(reg("HKLM","SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\OOBE","BypassNRO","REG_DWORD",1),reg("HKLM","SYSTEM\\Setup\\LabConfig","BypassNRO","REG_DWORD",1));
+  const selected=selectedAdvanced(), report=$("command-report").checked, lines=["$ErrorActionPreference = 'Continue'","$log = 'C:\\Windows\\Setup\\Scripts\\UnattendStudio-System.log'","'Applying system settings' | Out-File $log"];
+  if(report) lines.push(commandTrackingPrelude());
+  const append=(name,commands)=>{if(report) lines.push(trackedPowerShellStep(name,commands)); else lines.push(...commands);};
+  const add=(name,...commands)=>{if(selected.has(name)) append(name,commands);};
+  if($("network").checked) append("Skip network setup",[reg("HKLM","SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\OOBE","BypassNRO","REG_DWORD",1),reg("HKLM","SYSTEM\\Setup\\LabConfig","BypassNRO","REG_DWORD",1)]);
   add("Allow setup without internet",reg("HKLM","SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\OOBE","BypassNRO","REG_DWORD",1));
   add("Skip network page automatically",reg("HKLM","SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\OOBE","BypassNRO","REG_DWORD",1),reg("HKLM","SYSTEM\\Setup\\LabConfig","BypassNRO","REG_DWORD",1));
+  if($("network").checked||selected.has("Skip network page automatically")) append("Disable local-account security questions",[reg("HKLM","SOFTWARE\\Policies\\Microsoft\\Windows\\System","NoLocalPasswordResetQuestions","REG_DWORD",1)]);
   add("Prevent automatic device encryption",reg("HKLM","SYSTEM\\CurrentControlSet\\Control\\BitLocker","PreventDeviceEncryption","REG_DWORD",1));
   add("Disable Windows Defender",
     reg("HKLM","SOFTWARE\\Policies\\Microsoft\\Windows Defender","DisableAntiSpyware","REG_DWORD",1),
@@ -392,27 +412,33 @@ function advancedSystemScript() {
   add("Disable automatic driver delivery",reg("HKLM","SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate","ExcludeWUDriversInQualityUpdate","REG_DWORD",1));
   add("Prevent update restarts while signed in",reg("HKLM","SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU","NoAutoRebootWithLoggedOnUsers","REG_DWORD",1));
   add("Disable Delivery Optimization",reg("HKLM","SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization","DODownloadMode","REG_DWORD",0));
+  add("Enable Developer Mode",
+    reg("HKLM","SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\AppModelUnlock","AllowDevelopmentWithoutDevLicense","REG_DWORD",1),
+    reg("HKLM","SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\AppModelUnlock","AllowAllTrustedApps","REG_DWORD",1));
   add("Install Windows Recovery Environment","reagentc.exe /enable");
   add("Remove Windows Recovery Environment","reagentc.exe /disable","Remove-Item -LiteralPath 'C:\\Windows\\System32\\Recovery\\Winre.wim' -Force -ErrorAction SilentlyContinue");
   if(selected.has("Custom paging file")) {
     const initial=Number($("pagefile-initial")?.value||4096), maximum=Number($("pagefile-maximum")?.value||8192);
-    lines.push("Get-CimInstance Win32_ComputerSystem | Set-CimInstance -Property @{AutomaticManagedPagefile=$false}","Get-CimInstance Win32_PageFileSetting | Remove-CimInstance -ErrorAction SilentlyContinue",`New-CimInstance -ClassName Win32_PageFileSetting -Property @{Name='C:\\\\pagefile.sys';InitialSize=${initial};MaximumSize=${maximum}}`);
+    append("Configure custom paging file",[`$memory='Registry::HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management'; New-ItemProperty -LiteralPath $memory -Name 'PagingFiles' -PropertyType MultiString -Value @('C:\\pagefile.sys ${initial} ${maximum}') -Force`]);
   }
-  add("No paging file","Get-CimInstance Win32_ComputerSystem | Set-CimInstance -Property @{AutomaticManagedPagefile=$false}","Get-CimInstance Win32_PageFileSetting | Remove-CimInstance -ErrorAction SilentlyContinue");
+  add("No paging file","$memory='Registry::HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management'; New-ItemProperty -LiteralPath $memory -Name 'PagingFiles' -PropertyType MultiString -Value @() -Force");
   add("Enable Windows Sandbox","Enable-WindowsOptionalFeature -Online -FeatureName 'Containers-DisposableClientVM' -All -NoRestart");
   add("Enable Windows Subsystem for Linux","Enable-WindowsOptionalFeature -Online -FeatureName 'Microsoft-Windows-Subsystem-Linux' -All -NoRestart","Enable-WindowsOptionalFeature -Online -FeatureName 'VirtualMachinePlatform' -All -NoRestart");
   const defaults=perUserCommands(true), explorerDefaults=explorerPreferencesScript("HKEY_USERS\\DefaultUser");
-  if(defaults.length||explorerDefaults) lines.push("reg.exe load 'HKU\\DefaultUser' 'C:\\Users\\Default\\NTUSER.DAT'",...defaults,...(explorerDefaults?[explorerDefaults]:[]),"reg.exe unload 'HKU\\DefaultUser'");
-  if(state.selectedApps.size) lines.push(removalScript());
+  if(defaults.length||explorerDefaults) append("Default user preferences",["reg.exe load 'HKU\\DefaultUser' 'C:\\Users\\Default\\NTUSER.DAT'",...defaults,...(explorerDefaults?[explorerDefaults]:[]),"reg.exe unload 'HKU\\DefaultUser'"]);
+  if(state.selectedApps.size) append("Remove selected apps",[removalScript()]);
+  if(report) lines.push(commandTrackingSave("C:\\Windows\\Setup\\Scripts\\UnattendStudio-System-results.json"));
   lines.push("'System settings complete' | Out-File $log -Append");
   return lines.join(";\r\n");
 }
 
 function advancedUserScript() {
-  const selected=selectedAdvanced(), lines=["$ErrorActionPreference = 'Continue'","$log = 'C:\\Windows\\Setup\\Scripts\\UnattendStudio-User.log'"];
-  const add=(name,...commands)=>{if(selected.has(name)) lines.push(...commands);};
-  lines.push(accountCaseScript());
-  lines.push(...perUserCommands(false));
+  const selected=selectedAdvanced(), report=$("command-report").checked, lines=["$ErrorActionPreference = 'Continue'","$log = 'C:\\Windows\\Setup\\Scripts\\UnattendStudio-User.log'"];
+  if(report) lines.push(commandTrackingPrelude());
+  const append=(name,commands)=>{if(report) lines.push(trackedPowerShellStep(name,commands)); else lines.push(...commands);};
+  const add=(name,...commands)=>{if(selected.has(name)) append(name,commands);};
+  const caseScript=accountCaseScript(); if(caseScript) append("Preserve account name capitalization",[caseScript]);
+  const userCommands=perUserCommands(false); if(userCommands.length) append("Current user preferences",userCommands);
   const explorerPreferences=explorerPreferencesScript("HKEY_CURRENT_USER",true);
   if(explorerPreferences) lines.push(explorerPreferences);
   const vmScripts={
@@ -422,7 +448,11 @@ function advancedUserScript() {
     "Install Parallels Tools":"foreach($d in 'D'..'Z'){ $e=\"${d}:\\PTAgent.exe\"; if(Test-Path $e){ Start-Process $e -ArgumentList '/install_silent' -Wait; break } }"
   };
   Object.entries(vmScripts).forEach(([name,script])=>add(name,script));
-  lines.push("Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue","'User settings complete' | Out-File $log -Append");
+  if(state.selectedApps.size) append("Final app-removal pass",[removalScript()]);
+  append("Remove temporary OOBE account",["$temporary=Get-LocalUser | Where-Object Name -EQ 'defaultuser0'; if($temporary){ Remove-LocalUser -Name 'defaultuser0' -ErrorAction Continue }; if(Test-Path -LiteralPath 'C:\\Users\\defaultuser0'){ Remove-Item -LiteralPath 'C:\\Users\\defaultuser0' -Recurse -Force -ErrorAction SilentlyContinue }"]);
+  append("Restart Windows Explorer",["Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue"]);
+  if(report) lines.push(commandTrackingSave("C:\\Windows\\Setup\\Scripts\\UnattendStudio-User-results.json"),completionReportScript());
+  lines.push("'User settings complete' | Out-File $log -Append");
   return lines.join(";\r\n");
 }
 
@@ -435,7 +465,7 @@ function accountXml() {
   const accounts = state.accounts.map((account) => {
     const name = account.name.trim();
     const password = account.password ? `<Password><Value>${escapeXml(account.password)}</Value><PlainText>true</PlainText></Password>` : "";
-    return `<LocalAccount wcm:action="add">${password}<Name>${escapeXml(name)}</Name><DisplayName>${escapeXml(name)}</DisplayName><Group>${account.isAdmin?"Administrators":"Users"}</Group></LocalAccount>`;
+    return `<LocalAccount wcm:action="add"><Name>${escapeXml(name)}</Name><DisplayName>${escapeXml(name)}</DisplayName><Group>${account.isAdmin?"Administrators":"Users"}</Group>${password}</LocalAccount>`;
   }).join("");
   return `<UserAccounts><LocalAccounts>${accounts}</LocalAccounts></UserAccounts>`;
 }
@@ -443,7 +473,7 @@ function accountXml() {
 function autoLogonXml() {
   if ((!hasAdvanced("Sign in automatically once")&&!hasAdvanced("Skip network page automatically")&&!$("network").checked) || !state.accounts.length) return "";
   const account=state.accounts[0];
-  return `<AutoLogon><Enabled>true</Enabled><LogonCount>1</LogonCount><Username>${escapeXml(account.name.trim())}</Username><Password><Value>${escapeXml(account.password)}</Value><PlainText>true</PlainText></Password></AutoLogon>`;
+  return `<AutoLogon><Username>${escapeXml(account.name.trim())}</Username><Enabled>true</Enabled><LogonCount>1</LogonCount><Password><Value>${escapeXml(account.password)}</Value><PlainText>true</PlainText></Password></AutoLogon>`;
 }
 
 function generatedXml() {
@@ -454,7 +484,7 @@ function generatedXml() {
   const systemPath="C:\\Windows\\Setup\\Scripts\\UnattendStudio-System.ps1", userPath="C:\\Windows\\Setup\\Scripts\\UnattendStudio-User.ps1";
   const files=[[systemPath,advancedSystemScript()],[userPath,advancedUserScript()]];
   const extractor="$xml=[xml]::new();$xml.Load('C:\\Windows\\Panther\\unattend.xml');$sb=[scriptblock]::Create($xml.unattend.Extensions.ExtractScript);Invoke-Command -ScriptBlock $sb -ArgumentList $xml;";
-  const specialize=`<settings pass="specialize"><component name="Microsoft-Windows-Deployment" processorArchitecture="${architecture}" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"><RunSynchronous><RunSynchronousCommand wcm:action="add"><Order>1</Order><Description>Extract local customization scripts</Description><Path>${psCommand(extractor,hidden)}</Path></RunSynchronousCommand><RunSynchronousCommand wcm:action="add"><Order>2</Order><Description>Apply system settings and remove selected apps</Description><Path>powershell.exe -WindowStyle ${hidden?"Hidden":"Normal"} -NoProfile -ExecutionPolicy Bypass -File &quot;${systemPath}&quot;</Path></RunSynchronousCommand></RunSynchronous></component></settings>`;
+  const specialize=`<settings pass="specialize"><component name="Microsoft-Windows-Deployment" processorArchitecture="${architecture}" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"><RunSynchronous><RunSynchronousCommand wcm:action="add"><Order>1</Order><Description>Extract local customization scripts</Description><Path>${psCommand(extractor,hidden)}</Path></RunSynchronousCommand><RunSynchronousCommand wcm:action="add"><Order>2</Order><Description>Apply system settings and remove selected apps</Description><Path>powershell.exe -WindowStyle ${hidden?"Hidden":"Normal"} -NoProfile -ExecutionPolicy Bypass -File &quot;${systemPath}&quot;</Path></RunSynchronousCommand></RunSynchronous></component><component name="Microsoft-Windows-Shell-Setup" processorArchitecture="${architecture}" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"><ComputerName>${escapeXml(computer)}</ComputerName></component></settings>`;
   const firstLogon=`<FirstLogonCommands><SynchronousCommand wcm:action="add"><Order>1</Order><Description>Apply settings for the first account</Description><CommandLine>powershell.exe -WindowStyle ${hidden?"Hidden":"Normal"} -NoProfile -ExecutionPolicy Bypass -File &quot;${userPath}&quot;</CommandLine></SynchronousCommand></FirstLogonCommands>`;
   const peCommands=[];
   if(selected.has("Run Windows PE interactively")) peCommands.push("cmd.exe /c start /wait cmd.exe");
@@ -473,7 +503,7 @@ function generatedXml() {
 <unattend xmlns="urn:schemas-microsoft-com:unattend" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
   <settings pass="windowsPE"><component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="${architecture}" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"><InputLocale>${keyboard}</InputLocale><SystemLocale>${language}</SystemLocale><UILanguage>${language}</UILanguage><UserLocale>${language}</UserLocale></component><component name="Microsoft-Windows-Setup" processorArchitecture="${architecture}" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">${installImage}<UserData>${productKey}<AcceptEula>${$("eula").checked}</AcceptEula></UserData>${runPe}</component></settings>
   ${specialize}
-  <settings pass="oobeSystem"><component name="Microsoft-Windows-International-Core" processorArchitecture="${architecture}" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"><InputLocale>${keyboard}</InputLocale><SystemLocale>${language}</SystemLocale><UILanguage>${language}</UILanguage><UserLocale>${language}</UserLocale></component><component name="Microsoft-Windows-Shell-Setup" processorArchitecture="${architecture}" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"><ComputerName>${escapeXml(computer)}</ComputerName>${accountXml()}${autoLogonXml()}<OOBE><HideEULAPage>${$("eula").checked}</HideEULAPage><HideWirelessSetupInOOBE>${skipOobe}</HideWirelessSetupInOOBE><HideOnlineAccountScreens>${state.accounts.length>0||skipOobe}</HideOnlineAccountScreens>${skipOobe?"<HideOEMRegistrationScreen>true</HideOEMRegistrationScreen><SkipMachineOOBE>true</SkipMachineOOBE><SkipUserOOBE>true</SkipUserOOBE>":""}<ProtectYourPC>3</ProtectYourPC></OOBE>${firstLogon}</component></settings>
+  <settings pass="oobeSystem"><component name="Microsoft-Windows-International-Core" processorArchitecture="${architecture}" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS"><InputLocale>${keyboard}</InputLocale><SystemLocale>${language}</SystemLocale><UILanguage>${language}</UILanguage><UserLocale>${language}</UserLocale></component><component name="Microsoft-Windows-Shell-Setup" processorArchitecture="${architecture}" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">${accountXml()}${autoLogonXml()}<OOBE><ProtectYourPC>3</ProtectYourPC><HideEULAPage>${$("eula").checked}</HideEULAPage><HideWirelessSetupInOOBE>${skipOobe}</HideWirelessSetupInOOBE><HideOnlineAccountScreens>${state.accounts.length>0||skipOobe}</HideOnlineAccountScreens>${skipOobe?"<HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>":""}</OOBE>${firstLogon}</component></settings>
   ${extensionXml(files)}
 </unattend>`;
 }
@@ -481,6 +511,7 @@ function generatedXml() {
 function validateBasics() {
   const computer=$("computer").value.trim();
   if (computer && (!/^[A-Za-z0-9-]{1,15}$/.test(computer) || /^\d+$/.test(computer))) { alert(state.uiLanguage==="de"?"Verwende 1 bis 15 Buchstaben, Zahlen oder Bindestriche für den Computernamen. Er darf nicht nur aus Zahlen bestehen.":"Use 1 to 15 letters, numbers or hyphens for the computer name. It cannot contain only numbers."); showPage(1); $("computer").focus(); return false; }
+  if(computer&&state.accounts.some((account)=>account.name.trim().toLowerCase()===computer.toLowerCase())) { alert(state.uiLanguage==="de"?"Computername und Kontoname dürfen nicht identisch sein.":"The computer name and account name must be different."); showPage(1); $("computer").focus(); return false; }
   return true;
 }
 
@@ -593,6 +624,7 @@ $("language-toggle").addEventListener("click",()=>applyUiLanguage(state.uiLangua
 $("theme-toggle").addEventListener("click",()=>{const theme=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=theme;try{localStorage.setItem("unattend-studio-theme",theme);}catch{}updateThemeToggle();});
 $("add-account").addEventListener("click",()=>{ if (state.accounts.length>=5) return; state.accounts.push({id:crypto.randomUUID(),name:"",password:"",isAdmin:false,passwordVisible:false}); renderAccounts(); requestAnimationFrame(()=>$("accounts").lastElementChild?.querySelector("input")?.focus()); });
 $("app-search").addEventListener("input",renderAppList);
+$("command-report").addEventListener("change",updateOutput);
 $("copy").addEventListener("click",async()=>{ await navigator.clipboard.writeText(generatedXml()); $("copy").textContent=t("Copied"); setTimeout(()=>{$("copy").textContent=t("Copy XML");},1200); });
 $("save-preset").addEventListener("click",()=>{ if(!validateConfiguration()) return; try{localStorage.setItem("unattend-studio-preset-v1",JSON.stringify(capturePreset()));updatePresetChoice();$("save-preset").textContent=t("Preset saved");setTimeout(()=>{$("save-preset").textContent=t("Save as preset");},1400);}catch{alert(state.uiLanguage==="de"?"Der Browser konnte die Vorlage nicht lokal speichern.":"This browser did not allow the preset to be saved locally.");} });
 $("finish").addEventListener("click",()=>{ if (validateConfiguration()) downloadXml(); });
