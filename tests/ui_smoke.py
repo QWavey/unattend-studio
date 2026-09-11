@@ -6,6 +6,7 @@ Requires Selenium and an installed Chrome browser.
 from __future__ import annotations
 
 import sys
+import subprocess
 import time
 import xml.etree.ElementTree as ET
 
@@ -15,6 +16,19 @@ from selenium.webdriver.common.by import By
 
 
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:62835/main.html"
+
+
+def assert_powershell_parses(script: str, label: str) -> None:
+    parser = "$s=[Console]::In.ReadToEnd();$t=$null;$e=$null;[System.Management.Automation.Language.Parser]::ParseInput($s,[ref]$t,[ref]$e)|Out-Null;if($e.Count){$e|ForEach-Object{$_.Message};exit 1}"
+    result = subprocess.run(
+        ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", parser],
+        input=script,
+        text=True,
+        capture_output=True,
+        timeout=15,
+        check=False,
+    )
+    assert result.returncode == 0, f"{label} is not valid Windows PowerShell:\n{result.stdout}{result.stderr}"
 
 
 def browser() -> webdriver.Chrome:
@@ -140,6 +154,11 @@ def main() -> None:
         assert "Registry::HKEY_CURRENT_USER" in explorer_xml
         assert "$attempt -lt 5" in explorer_xml
 
+        driver.execute_script("document.querySelectorAll('[data-advanced]').forEach(e=>e.checked=true)")
+        scripts = driver.execute_script("return [advancedSystemScript(), advancedUserScript(), removalScript(), accountCaseScript()]")
+        for label, script in zip(("system script", "user script", "app-removal script", "account-name script"), scripts):
+            assert_powershell_parses(script, label)
+
         driver.execute_script("document.querySelectorAll('[data-advanced]').forEach(e=>e.checked=false);document.getElementById('network').checked=false")
         baseline = driver.execute_script("return generatedXml()")
         unchanged = []
@@ -223,7 +242,7 @@ def main() -> None:
         time.sleep(0.25)
         assert "has-preset" not in driver.find_element(By.ID, "profile-preset").get_attribute("class").split()
         driver.find_element(By.ID, "profile-preset").click()
-        assert "No presets saved yet" in driver.find_element(By.ID, "preset-content").text
+        assert driver.find_element(By.CSS_SELECTOR, ".preset-empty").is_displayed()
 
         driver.execute_script("localStorage.setItem('unattend-studio-preset-v1','not-json')")
         driver.refresh()

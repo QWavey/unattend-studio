@@ -15,6 +15,7 @@ import sys
 import threading
 import uuid
 import webbrowser
+import xml.etree.ElementTree as ET
 
 
 ROOT = Path(__file__).resolve().parent
@@ -73,7 +74,35 @@ def safe_job(job_id: str) -> dict | None:
     except (ValueError, AttributeError):
         return None
     with JOBS_LOCK:
-        return JOBS.get(normalized)
+        job = JOBS.get(normalized)
+        if not job:
+            return None
+        snapshot = job.copy()
+        snapshot["log"] = list(job.get("log", []))
+        return snapshot
+
+
+def claim_job_for_build(job_id: str) -> bool:
+    """Atomically reserve an uploaded ISO so only one builder can use it."""
+    with JOBS_LOCK:
+        job = JOBS.get(job_id)
+        if not job or job.get("status") != "uploaded":
+            return False
+        job.update(status="building", phase="queued", message="Starting ISO build", progress=21)
+        return True
+
+
+def validate_unattend_xml(xml: str) -> str:
+    """Reject malformed or unrelated XML before writing it into a Windows ISO."""
+    if not isinstance(xml, str) or not xml.lstrip().startswith("<?xml") or "<!DOCTYPE" in xml.upper():
+        raise ValueError("The generated answer file is invalid.")
+    try:
+        root = ET.fromstring(xml)
+    except ET.ParseError as error:
+        raise ValueError(f"The generated answer file is invalid: {error}.") from error
+    if root.tag != "{urn:schemas-microsoft-com:unattend}unattend":
+        raise ValueError("The generated answer file does not use the Windows unattended-setup format.")
+    return xml
 
 
 def update_job(job_id: str, **values) -> None:
@@ -280,16 +309,12 @@ class StudioHandler(SimpleHTTPRequestHandler):
                 raise ValueError("Invalid request size.")
             payload = json.loads(self.rfile.read(length))
             job_id = str(uuid.UUID(payload.get("job_id", "")))
-            xml = payload.get("xml", "")
-            if not xml.startswith("<?xml") or "<unattend" not in xml:
-                raise ValueError("The generated answer file is invalid.")
-            job = safe_job(job_id)
-            if not job or job.get("status") != "uploaded":
+            xml = validate_unattend_xml(payload.get("xml", ""))
+            if not claim_job_for_build(job_id):
                 raise ValueError("The ISO upload is missing or has already been used.")
         except (ValueError, json.JSONDecodeError) as error:
             self.send_error_text(400, str(error))
             return
-        update_job(job_id, status="building", phase="queued", message="Starting ISO build", progress=21)
         threading.Thread(target=build_iso, args=(job_id, xml), daemon=True, name=f"iso-{job_id[:8]}").start()
         self.send_json({"job_id": job_id, "status": "building"}, 202)
 
