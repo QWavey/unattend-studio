@@ -2,11 +2,52 @@
 
 const $ = (id) => document.getElementById(id);
 const escapeXml = (value) => String(value).replace(/[&<>"']/g, (char) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&apos;"})[char]);
+const de = {
+  "Local workspace":"Lokaler Arbeitsbereich","Source":"Quelle","Night":"Nacht","Day":"Tag","New answer file":"Neue Antwortdatei",
+  "Setup style":"Setup-Auswahl","Basics":"Grundlagen","Accounts":"Konten","Remove apps":"Apps entfernen","Advanced":"Erweitert","Output":"Ausgabe",
+  "Your settings and downloaded file remain on this computer.":"Deine Einstellungen und heruntergeladenen Dateien bleiben auf diesem Computer.",
+  "Build a clean Windows installation.":"Erstelle eine saubere Windows-Installation.","Step 1 of 6":"Schritt 1 von 6","Choose a starting point":"Wähle dein Setup",
+  "This sets sensible defaults. Every choice can still be changed.":"Wähle eine passende Grundlage. Alle Einstellungen lassen sich später ändern.",
+  "Lean Windows":"Schlankes Windows","Removes nearly everything Windows does not need to run. Best for experienced users who want the smallest install.":"Entfernt nahezu alles, was Windows nicht zum Ausführen benötigt. Für erfahrene Nutzer, die eine möglichst kleine Installation möchten.",
+  "Clean Windows":"Sauberes Windows","Removes advertising apps and common bloat while keeping core Windows tools and gaming support.":"Entfernt Werbe-Apps und übliche Bloatware, behält aber wichtige Windows-Werkzeuge und Gaming-Unterstützung.",
+  "Custom setup":"Eigenes Setup","Starts with no removals. Pick every app and setting yourself.":"Startet ohne Entfernungsvorgaben. Wähle jede App und Einstellung selbst.",
+  "Preconfigured":"Vorkonfiguriert","Manual":"Manuell","Presets":"Vorlagen","Saved locally":"Lokal gespeichert","Setup library":"Setup-Bibliothek","Back to setup styles":"Zurück zu den Setup-Stilen","Continue":"Weiter",
+  "Step 2 of 6":"Schritt 2 von 6","Windows basics":"Windows einrichten","Choose the language and identify this computer.":"Lege Sprache, Tastatur und Computernamen fest.",
+  "Display language":"Anzeigesprache","Keyboard layout":"Tastaturlayout","Computer name":"Computername","Processor architecture":"Prozessorarchitektur",
+  "English (United States)":"Englisch (USA)","English (United Kingdom)":"Englisch (Großbritannien)","United Kingdom":"Großbritannien","German":"Deutsch","French":"Französisch","Greek":"Griechisch","64-bit PC (recommended)":"64-Bit-PC (empfohlen)","32-bit PC":"32-Bit-PC",
+  "Maximum 15 characters. Letters, numbers and hyphens work best.":"Maximal 15 Zeichen. Buchstaben, Zahlen und Bindestriche funktionieren am besten.","Back":"Zurück","Next: accounts":"Weiter: Konten",
+  "Step 3 of 6":"Schritt 3 von 6","Local accounts":"Lokale Konten","Add up to five accounts. At least one administrator is recommended.":"Füge bis zu fünf Konten hinzu. Mindestens ein Administratorkonto wird empfohlen.",
+  "Add another account":"Weiteres Konto hinzufügen","Accept the license agreement":"Lizenzbedingungen akzeptieren","Required for an unattended Windows Setup.":"Für ein unbeaufsichtigtes Windows-Setup erforderlich.",
+  "Go straight to the desktop":"Direkt zum Desktop","Skips the network and remaining Windows setup screens, then signs in once.":"Überspringt Netzwerk- und restliche Windows-Einrichtungsseiten und meldet sich einmal an.","Next: remove apps":"Weiter: Apps entfernen",
+  "Step 4 of 6":"Schritt 4 von 6","Remove preinstalled apps":"Vorinstallierte Apps entfernen","Removal runs locally after the first administrator signs in.":"Die Entfernung läuft lokal nach der ersten Administratoranmeldung.",
+  "Xbox only":"Nur Xbox","Clear":"Zurücksetzen","Search apps":"Apps suchen","Some Windows tools are harder to restore after removal.":"Einige Windows-Werkzeuge lassen sich nach dem Entfernen nur schwer wiederherstellen.","Next: advanced":"Weiter: Erweitert",
+  "Step 5 of 6":"Schritt 5 von 6","Advanced options":"Erweiterte Optionen","Extra Windows Setup controls. Defaults are conservative.":"Passe zusätzliche Setup-Optionen an. Die Voreinstellungen sind sicher gewählt.",
+  "Recommended":"Empfohlen","Privacy":"Datenschutz","Developer":"Entwicklung","Virtual machine":"Virtuelle Maschine","Advanced settings can change security and recovery behavior.":"Erweiterte Einstellungen können Sicherheit und Wiederherstellung beeinflussen.","Review each enabled option before using the answer file.":"Prüfe jede aktivierte Option, bevor du die Antwortdatei verwendest.","Next: output":"Weiter: Ausgabe",
+  "Step 6 of 6":"Schritt 6 von 6","Your file is ready":"Deine Datei ist bereit","Review the setup, save it for later, or download the Windows answer file.":"Prüfe das Setup, speichere es als Vorlage oder lade die Windows-Antwortdatei herunter.",
+  "Inspect generated XML":"Erzeugtes XML prüfen","Before installing:":"Vor der Installation:","keep a backup and disconnect drives you do not want Windows Setup to touch.":"Erstelle eine Sicherung und trenne Laufwerke, die Windows Setup nicht verändern soll.",
+  "Save as preset":"Als Vorlage speichern","Copy XML":"XML kopieren","Download file":"Datei herunterladen",
+  "Windows Setup":"Windows-Setup","Disk and recovery":"Datenträger und Wiederherstellung","Privacy and security":"Datenschutz und Sicherheit","Desktop and taskbar":"Desktop und Taskleiste","System":"System","Virtual machine tools":"Werkzeuge für virtuelle Maschinen",
+  "Run Windows PE interactively":"Windows PE interaktiv ausführen","Enter product key interactively":"Produktschlüssel interaktiv eingeben","Use firmware product key":"Produktschlüssel aus Firmware verwenden","Select Windows image interactively":"Windows-Abbild interaktiv auswählen","Bypass Windows 11 requirements":"Windows-11-Anforderungen umgehen","Allow setup without internet":"Setup ohne Internet erlauben","Skip network page automatically":"Netzwerkseite automatisch überspringen","Sign in automatically once":"Einmal automatisch anmelden","Hide PowerShell windows":"PowerShell-Fenster ausblenden",
+  "Wipe and partition target disk":"Ziellaufwerk löschen und partitionieren","Automatic GPT or MBR layout":"Automatisches GPT- oder MBR-Layout","Install Windows Recovery Environment":"Windows-Wiederherstellungsumgebung installieren","Remove Windows Recovery Environment":"Windows-Wiederherstellungsumgebung entfernen","Custom paging file":"Benutzerdefinierte Auslagerungsdatei","No paging file":"Keine Auslagerungsdatei",
+  "Prevent automatic device encryption":"Automatische Geräteverschlüsselung verhindern","Disable Windows Defender":"Windows Defender deaktivieren","Disable SmartScreen":"SmartScreen deaktivieren","Disable telemetry":"Telemetrie deaktivieren","Disable activity history":"Aktivitätsverlauf deaktivieren","Disable advertising ID":"Werbe-ID deaktivieren","Disable app launch tracking":"App-Startverfolgung deaktivieren","Disable location services":"Ortungsdienste deaktivieren",
+  "Always show file extensions":"Dateierweiterungen immer anzeigen","Show hidden files":"Versteckte Dateien anzeigen","Use classic context menu":"Klassisches Kontextmenü verwenden","Open File Explorer to This PC":"Datei-Explorer mit „Dieser PC“ öffnen","Hide taskbar search":"Taskleistensuche ausblenden","Hide widgets":"Widgets ausblenden","Remove Start menu pins":"Startmenü-Anheftungen entfernen","Disable Windows Spotlight":"Windows-Blickpunkt deaktivieren",
+  "Disable hibernation":"Ruhezustand deaktivieren","Disable first-logon animation":"Animation bei erster Anmeldung deaktivieren","Disable automatic driver delivery":"Automatische Treiberbereitstellung deaktivieren","Prevent update restarts while signed in":"Update-Neustarts während der Anmeldung verhindern","Disable Delivery Optimization":"Übermittlungsoptimierung deaktivieren","Enable Windows Sandbox":"Windows Sandbox aktivieren","Enable Windows Subsystem for Linux":"Windows-Subsystem für Linux aktivieren",
+  "Install VirtualBox Guest Additions":"VirtualBox-Gasterweiterungen installieren","Install VMware Tools":"VMware Tools installieren","Install VirtIO tools":"VirtIO-Werkzeuge installieren","Install Parallels Tools":"Parallels Tools installieren",
+  "Opens a command prompt before Setup continues.":"Öffnet eine Eingabeaufforderung, bevor das Setup fortfährt.","Windows Setup asks for a product key.":"Windows Setup fragt nach einem Produktschlüssel.","Lets Setup use the key stored in UEFI firmware.":"Erlaubt dem Setup, den in der UEFI-Firmware gespeicherten Schlüssel zu verwenden.","Shows the edition picker instead of choosing an image silently.":"Zeigt die Editionsauswahl, statt ein Abbild automatisch auszuwählen.","Skips TPM, Secure Boot, RAM and CPU checks.":"Überspringt Prüfungen für TPM, Secure Boot, RAM und CPU.","Makes the local-account path available during OOBE.":"Macht die Einrichtung mit lokalem Konto während OOBE verfügbar.","Skips the connection page and continues with the local account.":"Überspringt die Verbindungsseite und fährt mit dem lokalen Konto fort.","Uses the first local account for the initial sign-in, then disables automatic sign-in.":"Verwendet das erste lokale Konto für die erste Anmeldung und deaktiviert danach die automatische Anmeldung.","Runs customization scripts without visible console windows.":"Führt Anpassungsskripte ohne sichtbare Konsolenfenster aus.",
+  "Erases disk 0 and installs to its available partition.":"Löscht Datenträger 0 und installiert auf der verfügbaren Partition.","Uses GPT for UEFI and MBR for legacy BIOS. Requires disk wiping.":"Verwendet GPT für UEFI und MBR für Legacy-BIOS. Erfordert das Löschen des Datenträgers.","Enables WinRE after Windows is installed.":"Aktiviert WinRE nach der Windows-Installation.","Disables WinRE and removes its recovery image.":"Deaktiviert WinRE und entfernt das Wiederherstellungsabbild.","Sets a fixed initial and maximum paging-file size.":"Legt feste Anfangs- und Maximalgrößen für die Auslagerungsdatei fest.","Disables automatic paging-file management.":"Deaktiviert die automatische Verwaltung der Auslagerungsdatei.",
+  "Disables Microsoft Defender services and policy protection.":"Deaktiviert Microsoft-Defender-Dienste und Richtlinienschutz.","Enables the disposable Windows Sandbox feature. Pro or Enterprise is required.":"Aktiviert die temporäre Windows Sandbox. Pro oder Enterprise ist erforderlich.","Enables the WSL optional feature. A Linux distribution is not installed.":"Aktiviert das optionale WSL-Feature. Eine Linux-Distribution wird nicht installiert.","Installs from an attached Guest Additions ISO on first sign-in.":"Installiert bei der ersten Anmeldung von einer eingebundenen Guest-Additions-ISO.","Installs from an attached VMware Tools ISO on first sign-in.":"Installiert bei der ersten Anmeldung von einer eingebundenen VMware-Tools-ISO.","Installs from an attached virtio-win ISO on first sign-in.":"Installiert bei der ersten Anmeldung von einer eingebundenen virtio-win-ISO.","Installs from an attached Parallels Tools ISO on first sign-in.":"Installiert bei der ersten Anmeldung von einer eingebundenen Parallels-Tools-ISO.",
+  "Initial size":"Anfangsgröße","Maximum size":"Maximalgröße","Account name":"Kontoname","Password":"Passwort","Required":"Erforderlich","Stored as plain text inside the XML file.":"Wird als Klartext in der XML-Datei gespeichert.","Is administrator":"Ist Administrator","Can install software and change system settings.":"Kann Software installieren und Systemeinstellungen ändern.","Remove":"Entfernen","Delete":"Löschen","Use preset":"Vorlage verwenden",
+  "Open your saved Windows setup.":"Öffne dein gespeichertes Windows-Setup.","No saved setup yet. Open to learn how to create one.":"Noch kein Setup gespeichert. Öffne den Bereich, um mehr zu erfahren.","No presets saved yet":"Noch keine Vorlagen gespeichert","Complete a setup and choose “Save as preset” on the Output page. It will appear here on this computer.":"Schließe ein Setup ab und wähle auf der Ausgabeseite „Als Vorlage speichern“. Danach erscheint es hier auf diesem Computer.",
+  "Search apps, for example Xbox or Copilot":"Apps suchen, zum Beispiel Xbox oder Copilot","Loading app catalog":"App-Katalog wird geladen","No apps match that search.":"Keine Apps entsprechen dieser Suche.","special removal rule":"besondere Entfernungsregel","Windows component, harder to restore":"Windows-Komponente, schwerer wiederherzustellen","Saved Windows setup":"Gespeichertes Windows-Setup","Saved preset":"Gespeicherte Vorlage","Setup name":"Setup-Name","Rename setup":"Setup umbenennen",
+  "Show password":"Passwort anzeigen","Hide password":"Passwort ausblenden","Switch to light mode":"Zum hellen Modus wechseln","Switch to dark mode":"Zum dunklen Modus wechseln","Switch page to German":"Seite auf Deutsch umstellen","Switch page to English":"Seite auf Englisch umstellen","Copied":"Kopiert","Preset saved":"Vorlage gespeichert"
+};
+const t = (english) => document.documentElement.lang === "de" ? (de[english] || english) : english;
 const state = {
   page: 0,
   completed: new Set(),
   profile: "standard",
   setupName: "",
+  uiLanguage: document.documentElement.lang === "de" ? "de" : "en",
   preconfigured: false,
   catalog: [],
   selectedApps: new Set(),
@@ -52,6 +93,46 @@ const exclusiveAdvanced = {
   "Install Windows Recovery Environment":["Remove Windows Recovery Environment"], "Remove Windows Recovery Environment":["Install Windows Recovery Environment"],
   "Custom paging file":["No paging file"], "No paging file":["Custom paging file"]
 };
+const advancedPresets = {
+  recommended:["Allow setup without internet","Skip network page automatically","Disable telemetry","Disable activity history","Disable advertising ID","Disable app launch tracking","Always show file extensions","Use classic context menu","Hide widgets","Disable Windows Spotlight","Prevent update restarts while signed in","Disable Delivery Optimization"],
+  privacy:["Disable telemetry","Disable activity history","Disable advertising ID","Disable app launch tracking","Disable location services","Disable Windows Spotlight","Disable Delivery Optimization"],
+  developer:["Always show file extensions","Show hidden files","Use classic context menu","Open File Explorer to This PC","Prevent update restarts while signed in","Enable Windows Sandbox","Enable Windows Subsystem for Linux"],
+  "virtual-machine":["Bypass Windows 11 requirements","Allow setup without internet","Skip network page automatically","Sign in automatically once","Hide PowerShell windows","Disable hibernation","Disable first-logon animation"],
+  none:[]
+};
+
+function translateStaticDom() {
+  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+  while(walker.nextNode()){
+    const node=walker.currentNode, trimmed=node.nodeValue.trim();
+    if(!trimmed) continue;
+    const english=node._i18nEnglish||trimmed;
+    if(!(english in de)) continue;
+    node._i18nEnglish=english;
+    node.nodeValue=node.nodeValue.replace(trimmed,t(english));
+  }
+  document.querySelectorAll("[placeholder],[aria-label]").forEach((element)=>{
+    for(const attribute of ["placeholder","aria-label"]){
+      if(!element.hasAttribute(attribute)) continue;
+      const cache=`i18n${attribute.replace("-","")}`;
+      const english=element.dataset[cache]||element.getAttribute(attribute);
+      if(!(english in de)) continue;
+      element.dataset[cache]=english; element.setAttribute(attribute,t(english));
+    }
+  });
+}
+
+function updateLanguageToggle(){const german=state.uiLanguage==="de";$("language-toggle").querySelector(".language-flag").innerHTML=german?'<svg viewBox="0 0 60 36"><rect width="60" height="12" fill="#181818"/><rect y="12" width="60" height="12" fill="#d71920"/><rect y="24" width="60" height="12" fill="#ffce00"/></svg>':'<svg viewBox="0 0 60 36"><rect width="60" height="36" fill="#012169"/><path d="M0 0l60 36M60 0 0 36" stroke="#fff" stroke-width="8"/><path d="M0 0l60 36M60 0 0 36" stroke="#c8102e" stroke-width="4"/><path d="M30 0v36M0 18h60" stroke="#fff" stroke-width="12"/><path d="M30 0v36M0 18h60" stroke="#c8102e" stroke-width="7"/></svg>';$("language-toggle").querySelector(".language-code").textContent=german?"DE":"EN";$("language-toggle").setAttribute("aria-label",german?t("Switch page to English"):"Switch page to German");}
+function applyUiLanguage(language,persist=true){
+  const selected=selectedAdvanced(), paging={initial:$("pagefile-initial")?.value,maximum:$("pagefile-maximum")?.value};
+  state.uiLanguage=language==="de"?"de":"en"; document.documentElement.lang=state.uiLanguage;
+  if(persist){try{localStorage.setItem("unattend-studio-language",state.uiLanguage);}catch{}}
+  renderAccounts(); renderAdvancedOptions();
+  document.querySelectorAll("[data-advanced]").forEach((input)=>{input.checked=selected.has(input.dataset.advanced);input.closest(".option-wrap")?.classList.toggle("enabled",input.checked);});
+  if(paging.initial)$("pagefile-initial").value=paging.initial;if(paging.maximum)$("pagefile-maximum").value=paging.maximum;
+  if(state.catalog.length)renderAppList(); updatePresetChoice(); if(!$("preset-panel").hidden)renderPresetPanel(); if(state.page===5)renderReview();
+  translateStaticDom(); updateLanguageToggle(); updateThemeToggle();
+}
 
 function reducedMotion() { return matchMedia("(prefers-reduced-motion: reduce)").matches; }
 function updateStepNavigation() {
@@ -105,17 +186,18 @@ function savedPreset() {
 }
 function updatePresetChoice() {
   const exists=Boolean(savedPreset());
-  $("preset-description").textContent=exists?"Open your saved Windows setup.":"No saved setup yet. Open to learn how to create one.";
+  $("preset-description").textContent=t(exists?"Open your saved Windows setup.":"No saved setup yet. Open to learn how to create one.");
   $("profile-preset").classList.toggle("has-preset",exists);
   if (!$("preset-panel").hidden) renderPresetPanel();
 }
 function renderPresetPanel() {
   const preset=savedPreset(), content=$("preset-content");
-  if(!preset){content.innerHTML='<div class="preset-empty"><strong>No presets saved yet</strong><span>Complete a setup and choose “Save as preset” on the Output page. It will appear here on this computer.</span></div>';return;}
-  const name=String(preset.setupName||profileDisplayName()).trim()||"Saved Windows setup";
+  if(!preset){content.innerHTML=`<div class="preset-empty"><strong>${t("No presets saved yet")}</strong><span>${t("Complete a setup and choose “Save as preset” on the Output page. It will appear here on this computer.")}</span></div>`;return;}
+  const name=String(preset.setupName||profileDisplayName()).trim()||t("Saved Windows setup");
   const accountCount=Array.isArray(preset.accounts)?preset.accounts.length:0;
   const appCount=Array.isArray(preset.apps)?preset.apps.length:0;
-  content.innerHTML=`<article class="saved-preset-card"><div><h3>${escapeXml(name)}</h3><p>${accountCount} account${accountCount===1?"":"s"} · ${appCount} app removal${appCount===1?"":"s"} · Saved locally</p></div><div class="preset-card-actions"><button class="button danger" type="button" data-delete-preset>Delete</button><button class="button primary" type="button" data-load-preset>Use preset</button></div></article>`;
+  const summary=state.uiLanguage==="de"?`${accountCount} ${accountCount===1?"Konto":"Konten"} · ${appCount} App-Entfernung${appCount===1?"":"en"} · Lokal gespeichert`:`${accountCount} account${accountCount===1?"":"s"} · ${appCount} app removal${appCount===1?"":"s"} · Saved locally`;
+  content.innerHTML=`<article class="saved-preset-card"><div><h3>${escapeXml(name)}</h3><p>${summary}</p></div><div class="preset-card-actions"><button class="button danger" type="button" data-delete-preset>${t("Delete")}</button><button class="button primary" type="button" data-load-preset>${t("Use preset")}</button></div></article>`;
 }
 function openPresetPanel() {
   renderPresetPanel();
@@ -131,7 +213,7 @@ function useSavedPreset() {
   loadPreset(); closePresetPanel();
 }
 function deleteSavedPreset() {
-  if(!savedPreset()||!confirm("Delete this saved preset? This cannot be undone.")) return;
+  if(!savedPreset()||!confirm(state.uiLanguage==="de"?"Diese gespeicherte Vorlage löschen? Dies kann nicht rückgängig gemacht werden.":"Delete this saved preset? This cannot be undone.")) return;
   try{localStorage.removeItem("unattend-studio-preset-v1");}catch{return;}
   if(state.profile==="preset"){
     state.profile="custom"; state.setupName="";
@@ -172,19 +254,17 @@ function usePreconfiguredProfile(profile, checked) {
   selectProfile(profile);
   state.accounts = [{id:crypto.randomUUID(),name:"Test",password:"Test123?",isAdmin:true,passwordVisible:false}];
   renderAccounts();
-  state.completed = new Set([0,1,2,3,4]);
-  showPage(5);
 }
 
 function renderAccounts() {
   $("accounts").innerHTML = state.accounts.map((account, index) => `
     <section class="account-row" data-account="${account.id}" style="--row-index:${index}">
-      <div class="account-heading"><h2>Account ${index + 1}</h2>${state.accounts.length > 1 ? `<button type="button" class="remove-account" data-remove-account="${account.id}">Remove</button>` : ""}</div>
+      <div class="account-heading"><h2>${state.uiLanguage==="de"?"Konto":"Account"} ${index + 1}</h2>${state.accounts.length > 1 ? `<button type="button" class="remove-account" data-remove-account="${account.id}">${t("Remove")}</button>` : ""}</div>
       <div class="field-grid">
-        <label>Account name<input type="text" data-account-field="name" value="${escapeXml(account.name)}" placeholder="${index === 0 ? "Alex" : "Account name"}" autocomplete="off"></label>
-        <label>Password<div class="password-control"><input type="${account.passwordVisible?"text":"password"}" data-account-field="password" value="${escapeXml(account.password)}" placeholder="Required" autocomplete="new-password"><button type="button" class="password-toggle ${account.passwordVisible?"visible":""}" data-toggle-password="${account.id}" aria-label="${account.passwordVisible?"Hide":"Show"} password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-5 9.5-5 9.5 5 9.5 5-3.5 5-9.5 5-9.5-5-9.5-5Z"/><circle cx="12" cy="12" r="2.5"/><path class="eye-slash" d="m5 4 14 16"/></svg></button></div><small>Stored as plain text inside the XML file.</small></label>
+        <label>${t("Account name")}<input type="text" data-account-field="name" value="${escapeXml(account.name)}" placeholder="${index === 0 ? "Alex" : t("Account name")}" autocomplete="off"></label>
+        <label>${t("Password")}<div class="password-control"><input type="${account.passwordVisible?"text":"password"}" data-account-field="password" value="${escapeXml(account.password)}" placeholder="${t("Required")}" autocomplete="new-password"><button type="button" class="password-toggle ${account.passwordVisible?"visible":""}" data-toggle-password="${account.id}" aria-label="${t(`${account.passwordVisible?"Hide":"Show"} password`)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-5 9.5-5 9.5 5 9.5 5-3.5 5-9.5 5-9.5-5-9.5-5Z"/><circle cx="12" cy="12" r="2.5"/><path class="eye-slash" d="m5 4 14 16"/></svg></button></div><small>${t("Stored as plain text inside the XML file.")}</small></label>
       </div>
-      <label class="admin-check"><input type="checkbox" data-account-field="isAdmin" ${account.isAdmin ? "checked" : ""}><span><strong>Is administrator</strong><small>Can install software and change system settings.</small></span></label>
+      <label class="admin-check"><input type="checkbox" data-account-field="isAdmin" ${account.isAdmin ? "checked" : ""}><span><strong>${t("Is administrator")}</strong><small>${t("Can install software and change system settings.")}</small></span></label>
     </section>`).join("");
   $("add-account").disabled = state.accounts.length >= 5;
 }
@@ -196,21 +276,35 @@ function renderAppList() {
     const name = appKey(app);
     const isCore = coreApps.has(name);
     const selectors = appSelectors(app,"PackageBloatwareStep").length + appSelectors(app,"CapabilityBloatwareStep").length + appSelectors(app,"OptionalFeatureBloatwareStep").length;
-    const detail = selectors ? `${selectors} removal rule${selectors === 1 ? "" : "s"}` : "special removal rule";
-    return `<label class="app-row" style="--row-index:${Math.min(index,12)}"><input type="checkbox" data-app="${escapeXml(name)}" ${state.selectedApps.has(name)?"checked":""}><span><strong>${escapeXml(name)}</strong><small>${detail}${isCore?" · Windows component, harder to restore":""}</small></span></label>`;
-  }).join("") : '<p class="loading">No apps match that search.</p>';
+    const detail = selectors ? (state.uiLanguage==="de"?`${selectors} Entfernungsregel${selectors===1?"":"n"}`:`${selectors} removal rule${selectors === 1 ? "" : "s"}`) : t("special removal rule");
+    return `<label class="app-row" style="--row-index:${Math.min(index,12)}"><input type="checkbox" data-app="${escapeXml(name)}" ${state.selectedApps.has(name)?"checked":""}><span><strong>${escapeXml(name)}</strong><small>${detail}${isCore?` · ${t("Windows component, harder to restore")}`:""}</small></span></label>`;
+  }).join("") : `<p class="loading">${t("No apps match that search.")}</p>`;
   updateAppCount();
 }
 
 function updateAppCount() {
   const count = state.selectedApps.size;
-  $("app-count").textContent = `${count} app${count === 1 ? "" : "s"} selected`;
+  $("app-count").textContent = state.uiLanguage==="de"?`${count} App${count===1?"":"s"} ausgewählt`:`${count} app${count === 1 ? "" : "s"} selected`;
 }
 
 function renderAdvancedOptions() {
   $("advanced-options").innerHTML = Object.entries(advancedGroups).map(([group,options]) => {
-    return `<details class="option-group"><summary>${escapeXml(group)}<span>${options.length}</span></summary><div class="option-group-body">${options.map((option) => `<div class="option-wrap"><label class="option-row"><input type="checkbox" data-advanced="${escapeXml(option)}"><span><strong>${escapeXml(option)}</strong>${advancedHelp[option]?`<small>${escapeXml(advancedHelp[option])}</small>`:""}</span></label>${option==="Custom paging file"?'<div class="inline-settings" data-for="Custom paging file"><label>Initial size<input id="pagefile-initial" type="number" min="256" max="131072" value="4096"><small>MB</small></label><label>Maximum size<input id="pagefile-maximum" type="number" min="256" max="131072" value="8192"><small>MB</small></label></div>':""}</div>`).join("")}</div></details>`;
+    return `<details class="option-group"><summary>${escapeXml(t(group))}<span>${options.length}</span></summary><div class="option-group-body">${options.map((option) => `<div class="option-wrap"><label class="option-row"><input type="checkbox" data-advanced="${escapeXml(option)}"><span><strong>${escapeXml(t(option))}</strong>${advancedHelp[option]?`<small>${escapeXml(t(advancedHelp[option]))}</small>`:""}</span></label>${option==="Custom paging file"?`<div class="inline-settings" data-for="Custom paging file"><label>${t("Initial size")}<input id="pagefile-initial" type="number" min="256" max="131072" value="4096"><small>MB</small></label><label>${t("Maximum size")}<input id="pagefile-maximum" type="number" min="256" max="131072" value="8192"><small>MB</small></label></div>`:""}</div>`).join("")}</div></details>`;
   }).join("");
+}
+
+function applyAdvancedPreset(name) {
+  const chosen=new Set(advancedPresets[name]||[]);
+  document.querySelectorAll("[data-advanced]").forEach((input)=>{
+    input.checked=chosen.has(input.dataset.advanced);
+    input.closest(".option-wrap")?.classList.toggle("enabled",input.checked);
+  });
+  document.querySelectorAll("[data-advanced-preset]").forEach((button)=>{
+    const active=button.dataset.advancedPreset===name;
+    button.classList.toggle("active",active); button.setAttribute("aria-pressed",String(active));
+  });
+  document.querySelectorAll(".option-group").forEach((group)=>{group.open=Boolean(group.querySelector("[data-advanced]:checked"));});
+  updateOutput();
 }
 
 function quotePowerShell(value) { return `'${String(value).replaceAll("'","''")}'`; }
@@ -371,7 +465,7 @@ function generatedXml() {
 
 function validateBasics() {
   const computer=$("computer").value.trim();
-  if (computer && (!/^[A-Za-z0-9-]{1,15}$/.test(computer) || /^\d+$/.test(computer))) { alert("Use 1 to 15 letters, numbers or hyphens for the computer name. It cannot contain only numbers."); showPage(1); $("computer").focus(); return false; }
+  if (computer && (!/^[A-Za-z0-9-]{1,15}$/.test(computer) || /^\d+$/.test(computer))) { alert(state.uiLanguage==="de"?"Verwende 1 bis 15 Buchstaben, Zahlen oder Bindestriche für den Computernamen. Er darf nicht nur aus Zahlen bestehen.":"Use 1 to 15 letters, numbers or hyphens for the computer name. It cannot contain only numbers."); showPage(1); $("computer").focus(); return false; }
   return true;
 }
 
@@ -388,15 +482,15 @@ function validateAccounts() {
   $("account-error").hidden=true;
   document.querySelectorAll("[data-account]").forEach((row)=>row.classList.remove("invalid"));
   if (state.preconfigured && !state.accounts.length) return true;
-  if (!state.accounts.length) { showAccountError("Add at least one account, including its name and password."); return false; }
+  if (!state.accounts.length) { showAccountError(state.uiLanguage==="de"?"Füge mindestens ein Konto mit Name und Passwort hinzu.":"Add at least one account, including its name and password."); return false; }
   const incomplete=state.accounts.findIndex((account)=>!account.name.trim() || !account.password);
-  if (incomplete>=0) { const missing=state.accounts[incomplete].name.trim()?"password":"name"; showAccountError(`Account ${incomplete+1} needs a ${missing} before you can continue.`,incomplete,missing); return false; }
+  if (incomplete>=0) { const missing=state.accounts[incomplete].name.trim()?"password":"name"; const message=state.uiLanguage==="de"?`Konto ${incomplete+1} benötigt ${missing==="password"?"ein Passwort":"einen Namen"}, bevor du fortfahren kannst.`:`Account ${incomplete+1} needs a ${missing} before you can continue.`; showAccountError(message,incomplete,missing); return false; }
   const names=state.accounts.map((account)=>account.name.trim());
   const reserved=new Set(["administrator","defaultaccount","guest","wdagutilityaccount","con","prn","aux","nul"]);
   const invalid=names.findIndex((name)=>!/^[-_. A-Za-z0-9]{1,20}$/.test(name) || /[. ]$/.test(name) || reserved.has(name.toLowerCase()));
-  if (invalid>=0) { showAccountError("Use a unique account name up to 20 characters. Reserved Windows names and names ending in a space or period are not allowed.",invalid); return false; }
-  if (new Set(names.map((name)=>name.toLowerCase())).size !== names.length) { showAccountError("Each local account needs a unique name."); return false; }
-  if ((state.selectedApps.size || selectedAdvanced().size) && state.accounts.length && !state.accounts.some((account)=>account.isAdmin)) { showAccountError("App removal and advanced changes need at least one administrator account."); return false; }
+  if (invalid>=0) { showAccountError(state.uiLanguage==="de"?"Verwende einen eindeutigen Kontonamen mit höchstens 20 Zeichen. Reservierte Windows-Namen sowie Namen mit abschließendem Leerzeichen oder Punkt sind nicht erlaubt.":"Use a unique account name up to 20 characters. Reserved Windows names and names ending in a space or period are not allowed.",invalid); return false; }
+  if (new Set(names.map((name)=>name.toLowerCase())).size !== names.length) { showAccountError(state.uiLanguage==="de"?"Jedes lokale Konto benötigt einen eindeutigen Namen.":"Each local account needs a unique name."); return false; }
+  if ((state.selectedApps.size || selectedAdvanced().size) && state.accounts.length && !state.accounts.some((account)=>account.isAdmin)) { showAccountError(state.uiLanguage==="de"?"App-Entfernung und erweiterte Änderungen benötigen mindestens ein Administratorkonto.":"App removal and advanced changes need at least one administrator account."); return false; }
   return true;
 }
 
@@ -404,7 +498,7 @@ function validateAdvanced() {
   if (!hasAdvanced("Custom paging file")) return true;
   const initial=Number($("pagefile-initial").value), maximum=Number($("pagefile-maximum").value);
   if (!Number.isInteger(initial)||!Number.isInteger(maximum)||initial<256||maximum<initial||maximum>131072) {
-    alert("Paging file sizes must be whole numbers from 256 to 131072 MB, and the maximum cannot be smaller than the initial size.");
+    alert(state.uiLanguage==="de"?"Größen der Auslagerungsdatei müssen ganze Zahlen zwischen 256 und 131072 MB sein. Die Maximalgröße darf nicht kleiner als die Anfangsgröße sein.":"Paging file sizes must be whole numbers from 256 to 131072 MB, and the maximum cannot be smaller than the initial size.");
     showPage(4); $("pagefile-initial").focus(); return false;
   }
   return true;
@@ -419,7 +513,7 @@ function validateStep(page) {
 
 function validateConfiguration() { return validateBasics() && validateAccounts() && validateAdvanced(); }
 
-function profileDisplayName() { return {minimal:"Lean Windows",standard:"Clean Windows",custom:"Custom setup",preset:"Saved preset"}[state.profile]||"Custom setup"; }
+function profileDisplayName() { return t({minimal:"Lean Windows",standard:"Clean Windows",custom:"Custom setup",preset:"Saved preset"}[state.profile]||"Custom setup"); }
 function commitSetupName(input) {
   if(!input?.isConnected) return;
   state.setupName=input.value.trim().slice(0,60);
@@ -428,7 +522,7 @@ function commitSetupName(input) {
 function editSetupName() {
   const value=state.setupName||profileDisplayName(), valueCell=$("setup-name")?.parentElement;
   if(!valueCell) return;
-  valueCell.innerHTML=`<label class="sr-only" for="setup-name-input">Setup name</label><input id="setup-name-input" class="setup-name-input" type="text" maxlength="60" value="${escapeXml(value)}">`;
+  valueCell.innerHTML=`<label class="sr-only" for="setup-name-input">${t("Setup name")}</label><input id="setup-name-input" class="setup-name-input" type="text" maxlength="60" value="${escapeXml(value)}">`;
   const input=$("setup-name-input"); input.focus(); input.select();
   input.addEventListener("blur",()=>commitSetupName(input),{once:true});
   input.addEventListener("keydown",(event)=>{if(event.key==="Enter"){event.preventDefault();commitSetupName(input);}if(event.key==="Escape"){event.preventDefault();renderReview();}});
@@ -436,10 +530,10 @@ function editSetupName() {
 
 function renderReview() {
   const adminCount=state.accounts.filter((account)=>account.isAdmin).length;
-  const accountSummary=state.accounts.length?`${state.accounts.length} (${adminCount} administrator${adminCount===1?"":"s"})`:"Create during Windows setup";
+  const accountSummary=state.accounts.length?(state.uiLanguage==="de"?`${state.accounts.length} (${adminCount} Administrator${adminCount===1?"":"en"})`:`${state.accounts.length} (${adminCount} administrator${adminCount===1?"":"s"})`):(state.uiLanguage==="de"?"Während des Windows-Setups erstellen":"Create during Windows setup");
   const setupName=state.setupName||profileDisplayName();
-  const rows=[["Computer",$("computer").value.trim()||"DESKTOP-PC"],["Accounts",accountSummary],["Apps removed",String(state.selectedApps.size)],["Advanced changes",String(document.querySelectorAll("[data-advanced]:checked").length)]];
-  $("review").innerHTML=`<div class="review-row"><dt>Setup style</dt><dd class="editable-value"><span id="setup-name">${escapeXml(setupName)}</span><button id="edit-setup-name" class="edit-name" type="button" aria-label="Rename setup"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15.5 5.5 3 3M5 19l3.8-.8L19 7a1.4 1.4 0 0 0 0-2l0 0a1.4 1.4 0 0 0-2 0L5.8 15.2 5 19Z"/></svg></button></dd></div>${rows.map(([term,value])=>`<div class="review-row"><dt>${escapeXml(term)}</dt><dd>${escapeXml(value)}</dd></div>`).join("")}`;
+  const rows=[[state.uiLanguage==="de"?"Computer":"Computer",$("computer").value.trim()||"DESKTOP-PC"],[t("Accounts"),accountSummary],[state.uiLanguage==="de"?"Entfernte Apps":"Apps removed",String(state.selectedApps.size)],[state.uiLanguage==="de"?"Erweiterte Änderungen":"Advanced changes",String(document.querySelectorAll("[data-advanced]:checked").length)]];
+  $("review").innerHTML=`<div class="review-row"><dt>${t("Setup style")}</dt><dd class="editable-value"><span id="setup-name">${escapeXml(setupName)}</span><button id="edit-setup-name" class="edit-name" type="button" aria-label="${t("Rename setup")}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15.5 5.5 3 3M5 19l3.8-.8L19 7a1.4 1.4 0 0 0 0-2l0 0a1.4 1.4 0 0 0-2 0L5.8 15.2 5 19Z"/></svg></button></dd></div>${rows.map(([term,value])=>`<div class="review-row"><dt>${escapeXml(term)}</dt><dd>${escapeXml(value)}</dd></div>`).join("")}`;
   $("preview").textContent=generatedXml();
 }
 
@@ -450,11 +544,11 @@ function downloadXml() {
 
 document.addEventListener("click",(event)=>{
   const next=event.target.closest(".next"), back=event.target.closest(".back"), go=event.target.closest("[data-go]"), remove=event.target.closest("[data-remove-account]"), passwordToggle=event.target.closest("[data-toggle-password]"), editName=event.target.closest("#edit-setup-name");
-  if (next && validateStep(state.page)) { state.completed.add(state.page); showPage(state.page+1); }
+  if (next && validateStep(state.page)) { if(state.page===0&&state.preconfigured){state.completed=new Set([0,1,2,3,4]);showPage(5);}else{state.completed.add(state.page);showPage(state.page+1);} }
   if (back) showPage(state.page-1);
   if (go) { const target=Number(go.dataset.go); if ((target===state.page || state.completed.has(target)) && (target<=state.page || validateConfiguration())) showPage(target); }
   if (remove) { state.accounts=state.accounts.filter((account)=>account.id!==remove.dataset.removeAccount); renderAccounts(); updateOutput(); }
-  if (passwordToggle) { const account=state.accounts.find((item)=>item.id===passwordToggle.dataset.togglePassword); const input=passwordToggle.parentElement.querySelector("input"); if(account&&input){account.passwordVisible=!account.passwordVisible;input.type=account.passwordVisible?"text":"password";passwordToggle.classList.toggle("visible",account.passwordVisible);passwordToggle.setAttribute("aria-label",`${account.passwordVisible?"Hide":"Show"} password`);} }
+  if (passwordToggle) { const account=state.accounts.find((item)=>item.id===passwordToggle.dataset.togglePassword); const input=passwordToggle.parentElement.querySelector("input"); if(account&&input){account.passwordVisible=!account.passwordVisible;input.type=account.passwordVisible?"text":"password";passwordToggle.classList.toggle("visible",account.passwordVisible);passwordToggle.setAttribute("aria-label",t(`${account.passwordVisible?"Hide":"Show"} password`));} }
   if (editName) { event.preventDefault(); editSetupName(); }
 });
 document.addEventListener("input",(event)=>{
@@ -464,6 +558,7 @@ document.addEventListener("input",(event)=>{
   if (accountField) { const row=event.target.closest("[data-account]"); const account=state.accounts.find((item)=>item.id===row.dataset.account); if (account) account[accountField]=accountField==="isAdmin"?event.target.checked:event.target.value; row.classList.remove("invalid"); $("account-error").hidden=true; updateOutput(); }
   const advanced=event.target.closest("[data-advanced]");
   if (advanced) {
+    document.querySelectorAll("[data-advanced-preset]").forEach((button)=>{button.classList.remove("active");button.setAttribute("aria-pressed","false");});
     (exclusiveAdvanced[advanced.dataset.advanced]||[]).forEach((name)=>{const other=[...document.querySelectorAll("[data-advanced]")].find((input)=>input.dataset.advanced===name);if(other){other.checked=false;other.closest(".option-wrap")?.classList.remove("enabled");}});
     if(advanced.dataset.advanced==="Automatic GPT or MBR layout"&&advanced.checked){const wipe=[...document.querySelectorAll("[data-advanced]")].find((input)=>input.dataset.advanced==="Wipe and partition target disk");wipe.checked=true;wipe.closest(".option-wrap")?.classList.add("enabled");}
     if(advanced.dataset.advanced==="Wipe and partition target disk"&&!advanced.checked){const auto=[...document.querySelectorAll("[data-advanced]")].find((input)=>input.dataset.advanced==="Automatic GPT or MBR layout");auto.checked=false;auto.closest(".option-wrap")?.classList.remove("enabled");}
@@ -473,17 +568,19 @@ document.addEventListener("input",(event)=>{
 document.querySelectorAll("input[name=profile]").forEach((input)=>input.addEventListener("change",()=>{ document.querySelectorAll("[data-preconfigured]").forEach((box)=>{box.checked=false;}); state.preconfigured=false; if(!state.accounts.length){state.accounts=[{id:crypto.randomUUID(),name:"",password:"",isAdmin:true,passwordVisible:false}];renderAccounts();} selectProfile(input.value); }));
 document.querySelectorAll("[data-preconfigured]").forEach((input)=>input.addEventListener("change",()=>usePreconfiguredProfile(input.dataset.preconfigured,input.checked)));
 document.querySelectorAll("[data-preset]").forEach((button)=>button.addEventListener("click",()=>applyPreset(button.dataset.preset)));
+document.querySelectorAll("[data-advanced-preset]").forEach((button)=>button.addEventListener("click",()=>applyAdvancedPreset(button.dataset.advancedPreset)));
 $("profile-preset").addEventListener("click",openPresetPanel);
 document.querySelector("[data-close-presets]").addEventListener("click",closePresetPanel);
 $("preset-content").addEventListener("click",(event)=>{if(event.target.closest("[data-load-preset]"))useSavedPreset();if(event.target.closest("[data-delete-preset]"))deleteSavedPreset();});
+$("language-toggle").addEventListener("click",()=>applyUiLanguage(state.uiLanguage==="en"?"de":"en"));
 $("theme-toggle").addEventListener("click",()=>{const theme=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=theme;try{localStorage.setItem("unattend-studio-theme",theme);}catch{}updateThemeToggle();});
 $("add-account").addEventListener("click",()=>{ if (state.accounts.length>=5) return; state.accounts.push({id:crypto.randomUUID(),name:"",password:"",isAdmin:false,passwordVisible:false}); renderAccounts(); requestAnimationFrame(()=>$("accounts").lastElementChild?.querySelector("input")?.focus()); });
 $("app-search").addEventListener("input",renderAppList);
-$("copy").addEventListener("click",async()=>{ await navigator.clipboard.writeText(generatedXml()); $("copy").textContent="Copied"; setTimeout(()=>{$("copy").textContent="Copy XML";},1200); });
-$("save-preset").addEventListener("click",()=>{ if(!validateConfiguration()) return; try{localStorage.setItem("unattend-studio-preset-v1",JSON.stringify(capturePreset()));updatePresetChoice();$("save-preset").textContent="Preset saved";setTimeout(()=>{$("save-preset").textContent="Save as preset";},1400);}catch{alert("This browser did not allow the preset to be saved locally.");} });
+$("copy").addEventListener("click",async()=>{ await navigator.clipboard.writeText(generatedXml()); $("copy").textContent=t("Copied"); setTimeout(()=>{$("copy").textContent=t("Copy XML");},1200); });
+$("save-preset").addEventListener("click",()=>{ if(!validateConfiguration()) return; try{localStorage.setItem("unattend-studio-preset-v1",JSON.stringify(capturePreset()));updatePresetChoice();$("save-preset").textContent=t("Preset saved");setTimeout(()=>{$("save-preset").textContent=t("Save as preset");},1400);}catch{alert(state.uiLanguage==="de"?"Der Browser konnte die Vorlage nicht lokal speichern.":"This browser did not allow the preset to be saved locally.");} });
 $("finish").addEventListener("click",()=>{ if (validateConfiguration()) downloadXml(); });
 
-function updateThemeToggle(){const dark=document.documentElement.dataset.theme==="dark";$("theme-toggle").setAttribute("aria-label",`Switch to ${dark?"light":"dark"} mode`);$("theme-toggle").setAttribute("aria-pressed",String(dark));$("theme-toggle").querySelector(".theme-label").textContent=dark?"Night":"Day";}
+function updateThemeToggle(){const dark=document.documentElement.dataset.theme==="dark";$("theme-toggle").setAttribute("aria-label",t(`Switch to ${dark?"light":"dark"} mode`));$("theme-toggle").setAttribute("aria-pressed",String(dark));$("theme-toggle").querySelector(".theme-label").textContent=t(dark?"Night":"Day");}
 
-renderAccounts(); renderAdvancedOptions(); updatePresetChoice(); updateStepNavigation(); updateThemeToggle();
-fetch("resource/Bloatware.json").then((response)=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json();}).then((catalog)=>{state.catalog=catalog.sort((a,b)=>a.DisplayName.localeCompare(b.DisplayName));if(state.profile==="preset"){state.selectedApps=new Set([...state.selectedApps].filter((name)=>state.catalog.some((app)=>appKey(app)===name)));renderAppList();}else selectProfile(state.profile);}).catch((error)=>{$("bloatware-list").innerHTML=`<p class="loading">Could not load the local app catalog (${escapeXml(error.message)}). Start with <code>python main.py</code>.</p>`;});
+renderAccounts(); renderAdvancedOptions(); updatePresetChoice(); updateStepNavigation(); applyUiLanguage(state.uiLanguage,false);
+fetch("resource/Bloatware.json").then((response)=>{if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json();}).then((catalog)=>{state.catalog=catalog.sort((a,b)=>a.DisplayName.localeCompare(b.DisplayName));if(state.profile==="preset"){state.selectedApps=new Set([...state.selectedApps].filter((name)=>state.catalog.some((app)=>appKey(app)===name)));renderAppList();}else selectProfile(state.profile);}).catch((error)=>{$("bloatware-list").innerHTML=`<p class="loading">${state.uiLanguage==="de"?"Der lokale App-Katalog konnte nicht geladen werden":"Could not load the local app catalog"} (${escapeXml(error.message)}). ${state.uiLanguage==="de"?"Starte die Anwendung mit":"Start with"} <code>python main.py</code>.</p>`;});

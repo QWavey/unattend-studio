@@ -35,15 +35,46 @@ def main() -> None:
         assert len(driver.find_elements(By.CSS_SELECTOR, "[data-advanced]")) == 42
         assert driver.find_element(By.CSS_SELECTOR, "[data-go='4']").get_attribute("disabled")
         assert driver.execute_script("return document.documentElement.dataset.theme") == "dark"
+        theme_toggle = driver.find_element(By.ID, "theme-toggle")
+        assert driver.execute_script("return getComputedStyle(arguments[0]).borderTopWidth", theme_toggle) == "0px"
+        assert driver.execute_script("return getComputedStyle(document.querySelector('.theme-track i')).backgroundColor") == "rgb(255, 255, 255)"
+        assert driver.find_element(By.CSS_SELECTOR, ".theme-track").rect["width"] >= 40
         figure_x = driver.find_element(By.CSS_SELECTOR, ".figure-panel").rect["x"]
         work_x = driver.find_element(By.CSS_SELECTOR, ".work-area").rect["x"]
         rail_x = driver.find_element(By.CSS_SELECTOR, ".setup-rail").rect["x"]
         assert figure_x < work_x < rail_x
         driver.find_element(By.ID, "theme-toggle").click()
+        time.sleep(0.25)
         assert driver.execute_script("return document.documentElement.dataset.theme") == "light"
         assert driver.execute_script("return localStorage.getItem('unattend-studio-theme')") == "light"
+        assert driver.execute_script("return getComputedStyle(document.querySelector('.theme-track i')).backgroundColor") == "rgb(0, 0, 0)"
         driver.find_element(By.ID, "theme-toggle").click()
+        time.sleep(0.25)
         assert driver.execute_script("return document.documentElement.dataset.theme") == "dark"
+
+        driver.find_element(By.ID, "language-toggle").click()
+        assert driver.execute_script("return document.documentElement.lang") == "de"
+        assert driver.execute_script("return localStorage.getItem('unattend-studio-language')") == "de"
+        assert driver.find_element(By.CSS_SELECTOR, "[data-page='0'] h1").text == "Wähle dein Setup"
+        assert "Erweitert" in driver.find_element(By.CSS_SELECTOR, "[data-go='4']").text
+        assert driver.find_element(By.CSS_SELECTOR, "[data-advanced-preset='recommended']").get_attribute("textContent") == "Empfohlen"
+
+        driver.execute_script("showPage(4)")
+        preset_counts = {"recommended": 12, "privacy": 7, "developer": 7, "virtual-machine": 7, "none": 0}
+        for preset, expected in preset_counts.items():
+            driver.find_element(By.CSS_SELECTOR, f"[data-advanced-preset='{preset}']").click()
+            assert len(driver.find_elements(By.CSS_SELECTOR, "[data-advanced]:checked")) == expected
+            assert "active" in driver.find_element(By.CSS_SELECTOR, f"[data-advanced-preset='{preset}']").get_attribute("class").split()
+        driver.find_element(By.CSS_SELECTOR, "[data-advanced-preset='privacy']").click()
+        driver.find_element(By.ID, "language-toggle").click()
+        assert driver.execute_script("return document.documentElement.lang") == "en"
+        assert driver.find_element(By.CSS_SELECTOR, "[data-advanced='Disable telemetry']").is_selected()
+        assert driver.find_element(By.CSS_SELECTOR, "[data-advanced='Disable telemetry']").find_element(By.XPATH, "following-sibling::span/strong").get_attribute("textContent") == "Disable telemetry"
+        driver.find_element(By.CSS_SELECTOR, "[data-advanced-preset='none']").click()
+        driver.execute_script("showPage(0)")
+        first_step = driver.find_element(By.CSS_SELECTOR, "[data-go='0']")
+        first_step.click()
+        assert driver.execute_script("return getComputedStyle(arguments[0]).outlineStyle", first_step) == "none"
 
         driver.find_element(By.ID, "profile-preset").click()
         time.sleep(0.25)
@@ -59,6 +90,9 @@ def main() -> None:
 
         driver.get(URL)
         driver.find_element(By.CSS_SELECTOR, "[data-preconfigured='standard']").click()
+        assert driver.find_element(By.CSS_SELECTOR, ".wizard-page.active").get_attribute("data-page") == "0"
+        assert driver.find_element(By.CSS_SELECTOR, "[data-go='5']").get_attribute("disabled")
+        driver.find_element(By.CSS_SELECTOR, "[data-page='0'] .next").click()
         assert driver.find_element(By.CSS_SELECTOR, ".wizard-page.active").get_attribute("data-page") == "5"
         assert driver.find_element(By.CSS_SELECTOR, "[data-account-field='name']").get_attribute("value") == "Test"
         assert driver.find_element(By.CSS_SELECTOR, "[data-account-field='password']").get_attribute("value") == "Test123?"

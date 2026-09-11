@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <title>Unattend Studio</title>
-  <script>try{document.documentElement.dataset.theme=localStorage.getItem("unattend-studio-theme")||"dark"}catch{document.documentElement.dataset.theme="dark"}</script>
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem("unattend-studio-theme")||"dark";document.documentElement.lang=localStorage.getItem("unattend-studio-language")||"en"}catch{document.documentElement.dataset.theme="dark";document.documentElement.lang="en"}</script>
   <link rel="stylesheet" href="ui/styles.css">
 </head>
 <body>
   <header class="app-bar">
     <a class="wordmark" href="#" aria-label="Unattend Studio home"><span class="wordmark-icon" aria-hidden="true">U</span><span>Unattend Studio</span></a>
-    <div class="app-bar-actions"><span class="local-label">Local workspace</span><button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to light mode"><span class="theme-label">Night</span><span class="theme-track" aria-hidden="true"><i></i></span></button><a href="https://github.com/cschneegans/unattend-generator" target="_blank" rel="noreferrer">Source</a></div>
+    <div class="app-bar-actions"><span class="local-label">Local workspace</span><button id="language-toggle" class="language-toggle" type="button" aria-label="Switch page to German"><span class="language-flag" aria-hidden="true"><svg viewBox="0 0 60 36"><rect width="60" height="36" fill="#012169"/><path d="M0 0l60 36M60 0 0 36" stroke="#fff" stroke-width="8"/><path d="M0 0l60 36M60 0 0 36" stroke="#c8102e" stroke-width="4"/><path d="M30 0v36M0 18h60" stroke="#fff" stroke-width="12"/><path d="M30 0v36M0 18h60" stroke="#c8102e" stroke-width="7"/></svg></span><span class="language-code">EN</span></button><button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to light mode"><span class="theme-label">Night</span><span class="theme-track" aria-hidden="true"><i></i></span></button><a href="https://github.com/cschneegans/unattend-generator" target="_blank" rel="noreferrer">Source</a></div>
   </header>
   <div class="app-shell">
     <aside class="figure-panel" aria-label="Windows setup illustration">
@@ -78,6 +78,7 @@
       </section>
       <section class="wizard-page" data-page="4">
         <div class="page-heading"><p>Step 5 of 6</p><h1>Advanced options</h1><span>Extra Windows Setup controls. Defaults are conservative.</span></div>
+        <div class="preset-bar" role="group" aria-label="Advanced presets"><button type="button" class="text-button" data-advanced-preset="recommended">Recommended</button><button type="button" class="text-button" data-advanced-preset="privacy">Privacy</button><button type="button" class="text-button" data-advanced-preset="developer">Developer</button><button type="button" class="text-button" data-advanced-preset="virtual-machine">Virtual machine</button><button type="button" class="text-button quiet" data-advanced-preset="none">Clear</button></div>
         <p class="advisory"><strong>Advanced settings can change security and recovery behavior.</strong> Review each enabled option before using the answer file.</p>
         <div id="advanced-options" class="option-groups"></div>
         <div class="wizard-actions"><button class="button back" type="button">Back</button><button class="button primary next" type="button">Next: output</button></div>
